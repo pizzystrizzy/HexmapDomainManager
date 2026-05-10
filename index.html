@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hex Map Editor</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#1a1a1a;color:#e8e8e8;height:100vh;width:100vw;overflow:hidden;display:flex;flex-direction:column;font-size:13px}
+#toolbar{display:flex;align-items:center;gap:5px;padding:4px 8px;background:#1e1e1e;border-bottom:1px solid #333;flex-shrink:0;flex-wrap:wrap;user-select:none}
+.tb-group{display:flex;align-items:center;gap:4px}
+.tb-sep{width:1px;height:18px;background:#3a3a3a;margin:0 2px}
+.tb-label{font-size:11px;color:#777;white-space:nowrap}
+button{font-size:11px;padding:3px 8px;border-radius:4px;border:1px solid #3a3a3a;background:#272727;color:#d0d0d0;cursor:pointer;white-space:nowrap;line-height:1.5}
+button:hover{background:#323232;border-color:#505050}
+button.on{background:#1a3a5a;border-color:#2a6ac0;color:#8ab4f8}
+input[type=range]{width:65px;accent-color:#5b8dd9;cursor:pointer;vertical-align:middle}
+input[type=checkbox]{accent-color:#5b8dd9;cursor:pointer}
+#val-size{font-size:11px;color:#888;min-width:22px}
+.mode-pill{font-size:11px;padding:3px 8px;border-radius:10px}
+.mode-pill.on{background:#1a3a5a;border-color:#2a6ac0;color:#8ab4f8}
+#main{display:flex;flex:1;overflow:hidden}
+#canvas-wrap{flex:1;overflow:hidden;position:relative;background:#0e0e0e}
+#c{position:absolute;top:0;left:0;transform-origin:0 0;cursor:crosshair}
+#canvas-wrap.cur-grab #c{cursor:grab}
+#canvas-wrap.cur-grabbing #c{cursor:grabbing}
+#canvas-wrap.cur-cell #c{cursor:cell}
+#canvas-wrap.cur-pointer #c{cursor:pointer}
+#sidebar{width:300px;background:#181818;border-left:1px solid #2a2a2a;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;font-size:12px}
+.sb-tabs{display:flex;border-bottom:1px solid #2a2a2a;flex-shrink:0;background:#151515}
+.sb-tab{flex:1;padding:6px 2px;font-size:10px;text-align:center;cursor:pointer;color:#666;border-bottom:2px solid transparent;user-select:none;white-space:nowrap}
+.sb-tab:hover{color:#999}
+.sb-tab.on{color:#8ab4f8;border-bottom-color:#5b8dd9}
+.sb-panel{display:none;flex-direction:column;flex:1;overflow:hidden}
+.sb-panel.on{display:flex}
+.sb-sect{border-bottom:1px solid #222;flex-shrink:0}
+.sb-sect-hd{font-size:10px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:.08em;padding:5px 9px 4px}
+.sb-sect-body{padding:4px 7px 6px}
+.sb-scroll{overflow-y:auto;flex:1;padding:4px}
+.view-row{display:flex;align-items:center;gap:5px;padding:2px 0}
+.view-row label{font-size:11px;color:#777;flex-shrink:0;width:76px}
+select.mini{font-size:11px;padding:2px 4px;border:1px solid #3a3a3a;border-radius:3px;background:#1a1a1a;color:#d0d0d0;flex:1}
+select.mini:focus{outline:none;border-color:#5b8dd9}
+.paint-pills{display:flex;gap:3px;flex-wrap:wrap;padding:3px 0}
+.ppill{font-size:10px;padding:2px 7px;border-radius:9px;border:1px solid #3a3a3a;background:#1e1e1e;color:#777;cursor:pointer}
+.ppill:hover{color:#ccc}
+.ppill.on{background:#1a3a2a;border-color:#2a7a4a;color:#6adfaa}
+.domain-item{border-radius:5px;border:1.5px solid transparent;margin-bottom:2px;overflow:hidden;cursor:pointer}
+.domain-item:hover .dh{background:#202020}
+.domain-item.on{border-color:#5b8dd9}
+.domain-item.on .dh{background:#141e2a}
+.dh{display:flex;align-items:center;gap:6px;padding:4px 6px}
+.dswatch{width:12px;height:12px;border-radius:2px;flex-shrink:0;border:1px solid rgba(255,255,255,.12)}
+.dname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;min-width:0}
+.dtier{font-size:9px;color:#555;font-style:italic;flex-shrink:0;max-width:58px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dcount{font-size:10px;color:#7aa8e8;flex-shrink:0;min-width:28px;text-align:right;white-space:nowrap}
+.ddel{font-size:14px;color:#444;cursor:pointer;padding:0 2px;flex-shrink:0}
+.ddel:hover{color:#e05050}
+.ddetail{display:none;padding:5px 9px 7px;font-size:11px;border-top:1px solid #1e1e1e;background:#101010}
+.domain-item.on .ddetail{display:block}
+.dr{display:flex;gap:5px;align-items:baseline;margin-bottom:3px}
+.dl{color:#555;width:58px;flex-shrink:0;font-size:10px;text-transform:uppercase;letter-spacing:.04em}
+.dv{flex:1;color:#bbb;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dlink{color:#7aa8e8;cursor:pointer;text-decoration:underline dotted}
+.dlink:hover{color:#aacaff}
+.ca-row{display:flex;gap:5px;align-items:center}
+.ca-row input[type=color]{width:34px;height:22px;border:none;background:none;padding:0;cursor:pointer;flex-shrink:0}
+.ca-row input[type=range]{flex:1}
+.ca-val{font-size:10px;color:#777;width:26px;text-align:right;flex-shrink:0}
+.tt-item{display:flex;align-items:center;gap:5px;padding:3px 5px;border-radius:4px;border:1px solid #222;margin-bottom:3px;background:#111}
+.tt-item input[type=text]{font-size:11px;padding:2px 4px;border:1px solid #222;border-radius:3px;background:#0e0e0e;color:#ccc;flex:1;min-width:0}
+.tt-item input[type=color]{width:26px;height:20px;border:none;background:none;padding:0;cursor:pointer;flex-shrink:0}
+.tt-name{flex:1;font-size:11px;color:#aaa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tt-del{font-size:13px;color:#444;cursor:pointer;padding:0 2px;flex-shrink:0}
+.tt-del:hover{color:#e05050}
+.hier-node{display:flex;align-items:center;gap:5px;padding:3px 5px;border-radius:4px;cursor:pointer;font-size:11px}
+.hier-node:hover{background:#1c1c1c}
+.hier-node.on{background:#141e2a;color:#8ab4f8}
+.hier-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.hier-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hier-info{font-size:10px;color:#555;white-space:nowrap}
+.poi-item{display:flex;align-items:center;gap:5px;padding:4px 6px;border-radius:4px;border:1px solid #222;margin-bottom:3px;background:#111;cursor:pointer;font-size:11px}
+.poi-item:hover{background:#1a1a1a}
+.poi-icon-display{font-size:13px;line-height:1;flex-shrink:0}
+.poi-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#bbb}
+.poi-coords{font-size:10px;color:#555}
+.poi-del{font-size:13px;color:#444;cursor:pointer;flex-shrink:0}
+.poi-del:hover{color:#e05050}
+#inspector{position:absolute;bottom:26px;left:8px;background:#181818;border:1px solid #333;border-radius:6px;padding:7px 10px;font-size:11px;min-width:175px;max-width:250px;display:none;pointer-events:none;z-index:50;line-height:1.6}
+#inspector.vis{display:block}
+#inspector strong{color:#8ab4f8}
+.irow{display:flex;gap:6px}
+.il{color:#555;width:68px;flex-shrink:0}
+.iv{color:#ccc}
+#statusbar{font-size:11px;color:#555;padding:2px 8px;background:#141414;border-top:1px solid #222;flex-shrink:0;display:flex;gap:16px}
+#smsg{flex:1}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;z-index:200}
+.modal-bg.vis{display:flex}
+.modal{background:#1c1c1c;border:1px solid #383838;border-radius:8px;padding:18px 20px;width:320px;max-width:94vw;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:13px;margin-bottom:12px;color:#ccc;border-bottom:1px solid #2a2a2a;padding-bottom:7px}
+.mf{margin-bottom:9px}
+.mf label{display:block;font-size:10px;color:#666;margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em}
+.mf input[type=text],.mf select,.mf textarea{width:100%;font-size:12px;padding:4px 7px;border:1px solid #333;border-radius:4px;background:#111;color:#d0d0d0}
+.mf input:focus,.mf select:focus,.mf textarea:focus{outline:none;border-color:#5b8dd9}
+.mf textarea{height:50px;resize:vertical}
+.mb{display:flex;gap:7px;margin-top:14px}
+.mb button{flex:1;padding:5px}
+.mb .primary{background:#1a3a6a;border-color:#2a6ac0;color:#8ab4f8}
+.mb .primary:hover{background:#1e4a80}
+.mb .danger{background:#3a1010;border-color:#8a2020;color:#e08080}
+#help-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;z-index:300}
+#help-bg.vis{display:flex}
+#help-box{background:#1c1c1c;border:1px solid #383838;border-radius:8px;padding:20px 24px;max-width:480px;width:94%;max-height:92vh;overflow-y:auto}
+#help-box h2{font-size:14px;margin-bottom:12px;color:#ccc}
+#help-box table{width:100%;border-collapse:collapse}
+#help-box td{padding:3px 5px;font-size:11px;vertical-align:top}
+#help-box td:first-child{color:#5b8dd9;font-family:monospace;white-space:nowrap;width:150px;padding-right:10px}
+#help-box td:last-child{color:#888}
+.hs{font-size:9px;color:#555;text-transform:uppercase;letter-spacing:.08em;padding-top:10px}
+/* color swatches for new domain */
+.color-presets{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px}
+.cp{width:22px;height:22px;border-radius:4px;cursor:pointer;border:2px solid transparent;flex-shrink:0}
+.cp:hover{border-color:#fff}
+.cp.on{border-color:#fff;box-shadow:0 0 0 1px #5b8dd9}
+/* border toggle in sidebar */
+.dbtn{font-size:10px;padding:1px 5px;border-radius:3px;border:1px solid #333;background:#1a1a1a;color:#666;cursor:pointer;flex-shrink:0;line-height:1.4}
+.dbtn:hover{border-color:#555;color:#aaa}
+.dbtn.on{border-color:#5b8dd9;background:#1a2a3a;color:#8ab4f8}
+.dbtn.sub{border-color:#4a7a3a;background:#1a2a1a;color:#6adfaa}
+.dbtn.sub.on{background:#1a3a1a;color:#6adfaa;border-color:#6adfaa}
+/* modal tabs */
+.modal-tabs{display:flex;gap:0;border-bottom:1px solid #2a2a2a;margin:-4px -4px 12px -4px;padding:0 4px}
+.modal-tab{font-size:11px;padding:5px 12px;cursor:pointer;color:#666;border-bottom:2px solid transparent}
+.modal-tab:hover{color:#aaa}
+.modal-tab.on{color:#8ab4f8;border-bottom-color:#5b8dd9}
+.modal-pane{display:none}
+.modal-pane.on{display:block}
+/* econ fields */
+.econ-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-bottom:8px}
+.econ-field label{display:block;font-size:10px;color:#666;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em}
+.econ-field input{width:100%;font-size:12px;padding:3px 6px;border:1px solid #333;border-radius:3px;background:#111;color:#d0d0d0}
+.econ-field input:focus{outline:none;border-color:#5b8dd9}
+.commodity-row{display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.commodity-row .cname{font-size:11px;color:#aaa;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.commodity-row input[type=number]{width:60px;font-size:11px;padding:2px 5px;border:1px solid #333;border-radius:3px;background:#111;color:#d0d0d0;text-align:right}
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <div class="tb-group">
+    <button onclick="triggerLoad('map-in')">&#128194; Map</button>
+    <input type="file" id="map-in" accept="image/*" style="display:none">
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <span class="tb-label">edit:</span>
+    <button id="btn-paint"   class="mode-pill on" onclick="setEM('paint')">&#9998; paint (P)</button>
+    <button id="btn-align"   class="mode-pill"    onclick="setEM('align')">&#8859; align (A)</button>
+    <button id="btn-erase"   class="mode-pill"    onclick="setEM('erase')">&#10007; erase (E)</button>
+    <button id="btn-inspect" class="mode-pill"    onclick="setEM('inspect')">&#9432; inspect (I)</button>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <span class="tb-label">size</span>
+    <input type="range" id="sld-size" min="6" max="120" value="28" oninput="hexSize=+this.value;document.getElementById('val-size').textContent=this.value;redraw()">
+    <span id="val-size">28</span>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <button onclick="nudge(-1,0)">&#9664;</button>
+    <button onclick="nudge(0,-1)">&#9650;</button>
+    <button onclick="nudge(0,1)">&#9660;</button>
+    <button onclick="nudge(1,0)">&#9654;</button>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <span class="tb-label">flat</span>
+    <input type="checkbox" id="chk-flat" onchange="flatTop=this.checked;redraw()">
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <span class="tb-label">grid</span>
+    <input type="range" id="sld-grid" min="0" max="100" value="50" title="Grid line opacity" oninput="gridOpacity=this.value/100;redraw()">
+    <span class="tb-label">fill</span>
+    <input type="range" id="sld-fill" min="0" max="100" value="55" title="Fill color opacity" oninput="fillOpacity=this.value/100;redraw()">
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <button style="background:#0e2a1a;border-color:#2a7a4a;color:#6adfaa" onclick="saveJSON()" title="Save (use Save As for new filename)">&#128190; Save</button>
+    <button style="background:#0e2a1a;border-color:#2a7a4a;color:#6adfaa" onclick="saveJSON(true)" title="Save As...">&#128190;&#8230;</button>
+    <button onclick="triggerLoad('data-in')">&#128194; Load</button>
+    <input type="file" id="data-in" accept=".json" style="display:none">
+  </div>
+  <div class="tb-sep"></div>
+  <button onclick="showHelp()">?</button>
+</div>
+<div id="main">
+  <div id="canvas-wrap">
+    <canvas id="c"></canvas>
+    <div id="inspector"></div>
+  </div>
+  <div id="sidebar">
+    <div class="sb-tabs">
+      <div class="sb-tab on"  onclick="showTab('view')">View</div>
+      <div class="sb-tab" onclick="showTab('domains')">Domains</div>
+      <div class="sb-tab" onclick="showTab('hier')">Tree</div>
+      <div class="sb-tab" onclick="showTab('world')">World</div>
+      <div class="sb-tab" onclick="showTab('pois')">POIs</div>
+    </div>
+    <div id="tab-view" class="sb-panel on">
+      <div class="sb-sect">
+        <div class="sb-sect-hd">Display layer</div>
+        <div class="sb-sect-body">
+          <div class="view-row">
+            <label>Show</label>
+            <select class="mini" id="sel-layer" onchange="onLayerChange()">
+              <option value="domain-direct">Domains (direct)</option>
+              <option value="domain-tier">Realms (by tier)</option>
+              <option value="terrain">Terrain</option>
+              <option value="civ">Civilization</option>
+            </select>
+          </div>
+          <div id="tier-layer-row" class="view-row" style="display:none">
+            <label>View tier</label>
+            <select class="mini" id="sel-tier-layer" onchange="viewTierLayer=this.value;redraw()"></select>
+          </div>
+          <div id="outline-tier-row" class="view-row" style="display:none">
+            <label>Outline tier</label>
+            <select class="mini" id="sel-outline-tier" onchange="outlineTierLayer=this.value;redraw()">
+              <option value="">None</option>
+            </select>
+          </div>
+          <div id="outline-color-row" class="view-row" style="display:none">
+            <label>Outline color</label>
+            <input type="color" id="outline-color" value="#cc2222" onchange="redraw()" style="width:34px;height:22px;border:none;background:none;cursor:pointer">
+          </div>
+          <div id="personal-domain-row" class="view-row">
+            <label style="font-size:10px;color:#666">Domain borders set per-domain in edit dialog</label>
+          </div>
+          <input type="hidden" id="sel-personal-domain" value="">
+          <input type="hidden" id="personal-domain-color" value="#111111">
+        </div>
+      </div>
+      <div class="sb-sect">
+        <div class="sb-sect-hd">Paint mode</div>
+        <div class="sb-sect-body">
+          <div class="paint-pills">
+            <span class="ppill on" id="pp-domain"  onclick="setPM('domain')">Domain</span>
+            <span class="ppill"    id="pp-terrain" onclick="setPM('terrain')">Terrain</span>
+            <span class="ppill"    id="pp-civ"     onclick="setPM('civ')">Civ</span>
+            <span class="ppill"    id="pp-road"    onclick="setPM('road')">Roads</span>
+            <span class="ppill"    id="pp-poi"     onclick="setPM('poi')">POI</span>
+          </div>
+          <div id="pm-domain-ui">
+            <div class="view-row"><label>Painting</label><span id="cur-domain-name" style="color:#8ab4f8;font-size:11px">&#8212;</span></div>
+          </div>
+          <div id="pm-terrain-ui" style="display:none">
+            <div class="view-row"><label>Terrain</label><select class="mini" id="sel-paint-terrain"></select></div>
+          </div>
+          <div id="pm-civ-ui" style="display:none">
+            <div class="view-row"><label>Civ level</label>
+              <select class="mini" id="sel-paint-civ">
+                <option value="unsettled">Unsettled</option>
+                <option value="civilized">Civilized</option>
+                <option value="borderlands">Borderlands</option>
+                <option value="outlands">Outlands</option>
+              </select>
+            </div>
+            <button onclick="autoCalcCiv()" style="width:100%;margin-top:5px;font-size:10px">&#9965; Auto-calc from city strongholds</button>
+          </div>
+          <div id="pm-road-ui" style="display:none">
+            <div style="font-size:10px;color:#555;padding:3px 0;line-height:1.5">Click hex to start road, click another to finish.</div>
+            <div class="view-row"><label>Color</label>
+              <input type="color" id="road-color" value="#c8a050" style="width:34px;height:20px;border:none;background:none;cursor:pointer">
+            </div>
+          </div>
+          <div id="pm-poi-ui" style="display:none">
+            <div style="font-size:10px;color:#555;padding:3px 0;line-height:1.5">Click a hex to place a POI.</div>
+          </div>
+        </div>
+      </div>
+      <div class="sb-sect">
+        <div class="sb-sect-hd">Legend</div>
+        <div class="sb-sect-body" id="legend-body" style="font-size:11px"></div>
+      </div>
+    </div>
+    <div id="tab-domains" class="sb-panel">
+      <div id="domain-scroll" class="sb-scroll"></div>
+      <div style="padding:6px;border-top:1px solid #1e1e1e;flex-shrink:0">
+        <button onclick="openDomainModal(null)" style="width:100%">+ New Domain</button>
+      </div>
+    </div>
+    <div id="tab-hier" class="sb-panel">
+      <div id="hier-scroll" class="sb-scroll"></div>
+    </div>
+    <div id="tab-world" class="sb-panel">
+      <div class="sb-sect">
+        <div class="sb-sect-hd">Tiers / hierarchy levels</div>
+        <div class="sb-sect-body">
+          <div id="tiers-list"></div>
+          <button onclick="addTier()" style="width:100%;margin-top:4px;font-size:11px">+ Add tier</button>
+        </div>
+      </div>
+      <div class="sb-sect">
+        <div class="sb-sect-hd">Terrain types</div>
+        <div class="sb-sect-body">
+          <div id="terrain-list"></div>
+          <button onclick="addTerrain()" style="width:100%;margin-top:4px;font-size:11px">+ Add terrain type</button>
+        </div>
+      </div>
+      <div class="sb-sect">
+        <div class="sb-sect-hd">Civilization level colors</div>
+        <div class="sb-sect-body" id="civdef-list"></div>
+      </div>
+      <div class="sb-sect">
+        <div class="sb-sect-hd">Commodities</div>
+        <div class="sb-sect-body">
+          <div id="commodity-list"></div>
+          <button onclick="addCommodity()" style="width:100%;margin-top:4px;font-size:11px">+ Add commodity</button>
+        </div>
+      </div>
+    </div>
+    <div id="tab-pois" class="sb-panel">
+      <div id="poi-scroll" class="sb-scroll"></div>
+    </div>
+  </div>
+</div>
+<div id="statusbar">
+  <span id="smsg">Ready &#8212; scroll=pan, Ctrl+scroll=zoom, Space+drag=pan, Alt+click=erase.</span>
+  <span id="scoords" style="white-space:nowrap;color:#444"></span>
+</div>
+
+<!-- DOMAIN MODAL -->
+<div class="modal-bg" id="domain-modal">
+  <div class="modal">
+    <h3 id="dm-title">New Domain</h3>
+    <div class="modal-tabs">
+      <div class="modal-tab on" onclick="switchModalTab('general')">General</div>
+      <div class="modal-tab" onclick="switchModalTab('econ')">Economy</div>
+    </div>
+    <!-- GENERAL PANE -->
+    <div id="modal-pane-general" class="modal-pane on">
+      <div class="mf"><label>Name</label><input type="text" id="dm-name" onkeydown="if(event.key==='Enter')saveDomainModal()"></div>
+      <div class="mf"><label>Tier</label><select id="dm-tier"></select></div>
+      <div class="mf"><label>Ruler</label><input type="text" id="dm-ruler" placeholder="optional"></div>
+      <div class="mf"><label>Liege domain</label><select id="dm-liege"></select></div>
+      <div class="mf">
+        <label>Color</label>
+        <div class="color-presets" id="color-presets"></div>
+        <div class="ca-row">
+          <input type="color" id="dm-color" value="#4a90d9" oninput="syncColorPicker(this.value)">
+          <input type="range" id="dm-alpha" min="10" max="100" value="50" oninput="document.getElementById('dm-alpha-val').textContent=this.value+'%'">
+          <span class="ca-val" id="dm-alpha-val">50%</span>
+        </div>
+      </div>
+      <div class="mf">
+        <label>Stronghold &#160;<span id="dm-sh-label" style="color:#8ab4f8;font-size:10px"></span></label>
+        <button id="dm-sh-btn" onclick="startPickSH()" style="width:100%;font-size:11px">&#9733; Pick on map</button>
+      </div>
+      <div class="mf"><label>Stronghold type</label>
+        <select id="dm-shtype">
+          <option value="">&#8212; none &#8212;</option>
+          <option value="city">City / Large Town (used for civ calc)</option>
+          <option value="town">Town</option>
+          <option value="fort">Fort / Keep</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="mf">
+        <label>Border display</label>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:3px">
+          <input type="checkbox" id="dm-show-border">
+          <label for="dm-show-border" style="font-size:11px;color:#aaa;text-transform:none;letter-spacing:0">Show border around this domain</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px">
+          <input type="checkbox" id="dm-show-sub-borders">
+          <label for="dm-show-sub-borders" style="font-size:11px;color:#aaa;text-transform:none;letter-spacing:0">Show borders for all sub-domains</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px">
+          <input type="color" id="dm-border-color" value="#111111" style="width:34px;height:22px;border:none;background:none;cursor:pointer">
+          <span style="font-size:11px;color:#888">Border color (for own border)</span>
+        </div>
+      </div>
+    </div>
+    <!-- ECONOMY PANE -->
+    <div id="modal-pane-econ" class="modal-pane">
+      <div class="econ-grid">
+        <div class="econ-field">
+          <label>Morale</label>
+          <input type="number" id="dm-morale" min="-4" max="4" step="1" placeholder="0">
+        </div>
+        <div class="econ-field">
+          <label>Market class</label>
+          <input type="number" id="dm-market-class" min="0" max="6" step="1" placeholder="0">
+        </div>
+        <div class="econ-field">
+          <label>Peasant families</label>
+          <input type="number" id="dm-peasant-fam" min="0" step="1" placeholder="0">
+        </div>
+        <div class="econ-field">
+          <label>Urban families</label>
+          <input type="number" id="dm-urban-fam" min="0" step="1" placeholder="0">
+        </div>
+      </div>
+      <div class="mf">
+        <label>Demand modifiers</label>
+        <div id="dm-commodity-rows" style="margin-top:4px;max-height:180px;overflow-y:auto"></div>
+      </div>
+    </div>
+    <div class="mb">
+      <button class="primary" onclick="saveDomainModal()">Save</button>
+      <button onclick="closeDomainModal()">Cancel</button>
+      <button class="danger" id="dm-delete-btn" onclick="deleteDomainFromModal()" style="display:none">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- POI MODAL -->
+<div class="modal-bg" id="poi-modal">
+  <div class="modal">
+    <h3>Point of Interest</h3>
+    <div class="mf"><label>Name</label><input type="text" id="pm-name" onkeydown="if(event.key==='Enter')savePOI()"></div>
+    <div class="mf"><label>Icon (emoji or symbol)</label><input type="text" id="pm-icon" value="&#9670;" maxlength="2"></div>
+    <div class="mf"><label>Notes</label><textarea id="pm-notes"></textarea></div>
+    <div class="mb">
+      <button class="primary" onclick="savePOI()">Save</button>
+      <button onclick="closePOIModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- HELP -->
+<div id="help-bg" onclick="hideHelp()">
+  <div id="help-box" onclick="event.stopPropagation()">
+    <h2>Hex Map Editor &#8212; Help</h2>
+    <table>
+      <tr><td class="hs" colspan="2">Navigation</td></tr>
+      <tr><td>Scroll wheel</td><td>Pan up/down. Shift+scroll = left/right.</td></tr>
+      <tr><td>Ctrl + scroll</td><td>Zoom in/out centered on cursor</td></tr>
+      <tr><td>Space + drag</td><td>Pan freely</td></tr>
+      <tr><td>Middle-click drag</td><td>Pan</td></tr>
+      <tr><td>Arrow keys</td><td>Nudge grid 1px (Shift = 0.25px fine)</td></tr>
+      <tr><td class="hs" colspan="2">Edit modes</td></tr>
+      <tr><td>P</td><td>Paint</td></tr>
+      <tr><td>A</td><td>Align &#8212; drag to reposition hex grid</td></tr>
+      <tr><td>E</td><td>Erase</td></tr>
+      <tr><td>I</td><td>Inspect &#8212; hover to see hex data</td></tr>
+      <tr><td>Alt + click/drag</td><td>Quick erase (any mode)</td></tr>
+      <tr><td>Esc</td><td>Back to paint / close dialogs</td></tr>
+      <tr><td class="hs" colspan="2">Display &#8212; Realms by tier</td></tr>
+      <tr><td colspan="2" style="color:#666;line-height:1.6">
+        Select a <strong style="color:#aaa">View tier</strong> to collapse all sub-domains up to that level.
+        Each hex shows the color of its ancestor at that tier (or its own color if it has no ancestor at that tier).
+        Optionally pick an <strong style="color:#aaa">Outline tier</strong> to draw a thick colored border around the boundaries of domains at a higher tier &#8212; useful for seeing duchy boundaries while viewing at the county level.
+      </td></tr>
+      <tr><td class="hs" colspan="2">Grid / Fill sliders</td></tr>
+      <tr><td colspan="2" style="color:#666">Grid controls hex line opacity. Fill controls color fill opacity. They are independent. Grid lines always draw on top of fills.</td></tr>
+      <tr><td class="hs" colspan="2">Stronghold workflow</td></tr>
+      <tr><td colspan="2" style="color:#666;line-height:1.6">Open New Domain, fill details, click Pick on map &#8212; form is stashed and restored. City strongholds used for auto-civ (&#8804;8 hex = civilized, &#8804;12 = borderlands).</td></tr>
+    </table>
+    <button onclick="hideHelp()" style="margin-top:14px;width:100%">Close</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+var mapImg=null, mapW=1000, mapH=700;
+var hexSize=28, gridOffX=0, gridOffY=0, flatTop=false;
+var gridOpacity=0.5, fillOpacity=0.55;
+var hexData={}, roads={}, domains=[], tiers=[], terrainTypes=[];
+var domainCounter=0, poiCounter=0, activeDomain=null;
+var viewLayer='domain-direct', viewTierLayer='', outlineTierLayer='';
+var editMode='paint', paintMode='domain';
+var viewX=0, viewY=0, viewScale=1;
+var isPainting=false, isDragging=false, midDrag=false, spaceDrag=false;
+var dragSX=0, dragSY=0, dragVX=0, dragVY=0, dragGX=0, dragGY=0;
+var spaceDown=false, altDown=false;
+var roadStart=null, pickingSH=false, pickingSHfor=null, shStash=null;
+var editingDomainId=null, pendingPOIhex=null;
+var undoStack=[], undoMaxDepth=50;
+function pushUndo(){
+  undoStack.push(JSON.stringify(hexData));
+  if(undoStack.length>undoMaxDepth)undoStack.shift();
+}
+function doUndo(){
+  if(!undoStack.length){setStatus('Nothing to undo.');return;}
+  hexData=JSON.parse(undoStack.pop());
+  redraw();renderDomainList();setStatus('Undo. ('+undoStack.length+' steps remain)');
+}
+
+var canvas=document.getElementById('c');
+var ctx=canvas.getContext('2d');
+var wrap=document.getElementById('canvas-wrap');
+var inspector=document.getElementById('inspector');
+
+// Distinct, attractive preset colors (8 that work well together)
+var PRESET_COLORS=[
+  '#d9534f', // red
+  '#e8943a', // orange
+  '#d4b83a', // gold
+  '#5aaa5a', // green
+  '#4a90d9', // blue
+  '#8e5db5', // purple
+  '#48a8a0', // teal
+  '#c47ab0'  // mauve
+];
+
+tiers=[{id:'t1',name:'Kingdom'},{id:'t2',name:'Principality'},{id:'t3',name:'County'},{id:'t4',name:'Barony'}];
+var commodities=[
+  {id:'c1',name:'Grain'},{id:'c2',name:'Livestock'},{id:'c3',name:'Wood'},
+  {id:'c4',name:'Stone'},{id:'c5',name:'Iron'},{id:'c6',name:'Salt'},
+  {id:'c7',name:'Cloth'},{id:'c8',name:'Furs'},{id:'c9',name:'Wine'},
+  {id:'c10',name:'Spices'}
+];
+terrainTypes=[
+  {id:'tr1',name:'Barrens',color:'#b8a878'},{id:'tr2',name:'Coast',color:'#7abecc'},
+  {id:'tr3',name:'Desert',color:'#e8d090'},{id:'tr4',name:'Grasslands',color:'#90c860'},
+  {id:'tr5',name:'Forest',color:'#3a7a3a'},{id:'tr6',name:'Hills',color:'#a09060'},
+  {id:'tr7',name:'Jungle',color:'#287828'},{id:'tr8',name:'Mountains',color:'#807870'},
+  {id:'tr9',name:'Ocean',color:'#2860a8'},{id:'tr10',name:'River',color:'#5090d8'},
+  {id:'tr11',name:'Scrublands',color:'#a8b860'},{id:'tr12',name:'Swamp',color:'#607850'}
+];
+var civColors={unsettled:'#2a2a2a',civilized:'#e8e0a8',borderlands:'#c09050',outlands:'#705838'};
+
+// ═══════════════════════════════════════
+// HEX MATH
+// ═══════════════════════════════════════
+function hexCorners(cx,cy,sz,flat){
+  var p=[];
+  for(var i=0;i<6;i++){var a=Math.PI/180*(flat?60*i:60*i-30);p.push([cx+sz*Math.cos(a),cy+sz*Math.sin(a)]);}
+  return p;
+}
+function hexCenter(col,row,sz,flat,ox,oy){
+  var x,y;
+  if(flat){x=sz*1.5*col;y=sz*Math.sqrt(3)*(row+(col&1)*.5);}
+  else{x=sz*Math.sqrt(3)*(col+(row&1)*.5);y=sz*1.5*row;}
+  return[x+ox,y+oy];
+}
+function pixelToHex(px,py){
+  var qx=px-gridOffX,qy=py-gridOffY,q,r;
+  if(flatTop){q=(2/3*qx)/hexSize;r=(-1/3*qx+Math.sqrt(3)/3*qy)/hexSize;}
+  else{q=(Math.sqrt(3)/3*qx-1/3*qy)/hexSize;r=(2/3*qy)/hexSize;}
+  var s=-q-r,rq=Math.round(q),rr=Math.round(r),rs=Math.round(s);
+  var dq=Math.abs(rq-q),dr=Math.abs(rr-r),ds=Math.abs(rs-s);
+  if(dq>dr&&dq>ds)rq=-rr-rs;else if(dr>ds)rr=-rq-rs;
+  if(flatTop)return[rq,rr+(rq-(rq&1))/2];
+  return[rq+(rr-(rr&1))/2,rr];
+}
+function hkey(c,r){return c+','+r;}
+function hexDist(c1,r1,c2,r2){var dq=c1-c2,dr=r1-r2;return(Math.abs(dq)+Math.abs(dr)+Math.abs(dq+dr))/2;}
+function roadKey(c1,r1,c2,r2){var a=hkey(c1,r1),b=hkey(c2,r2);return a<b?a+'|'+b:b+'|'+a;}
+function ptNbrs(c, r) {
+  var o = r & 1;
+  return [
+    [c + 1, r],         // Edge 0: Right
+    [c + o, r + 1],     // Edge 1: Lower-Right
+    [c - 1 + o, r + 1], // Edge 2: Lower-Left
+    [c - 1, r],         // Edge 3: Left
+    [c - 1 + o, r - 1], // Edge 4: Upper-Left
+    [c + o, r - 1]      // Edge 5: Upper-Right
+  ];
+}
+function ftNbrs(c, r) {
+  var o = c & 1;
+  return [
+    [c + 1, r + o],     // Edge 0: Lower-Right
+    [c, r + 1],         // Edge 1: Bottom
+    [c - 1, r + o],     // Edge 2: Lower-Left
+    [c - 1, r - 1 + o], // Edge 3: Upper-Left
+    [c, r - 1],         // Edge 4: Top
+    [c + 1, r - 1 + o]  // Edge 5: Upper-Right
+  ];
+}
+function nbrs(c,r){return flatTop?ftNbrs(c,r):ptNbrs(c,r);}
+
+// ═══════════════════════════════════════
+// DOMAIN HELPERS
+// ═══════════════════════════════════════
+function getHex(k){if(!hexData[k])hexData[k]={domain:'',terrain:'',civ:'',civOverride:false,pois:[]};return hexData[k];}
+function findDomain(id){return domains.find(function(d){return d.id===id;})||null;}
+function findTerrain(id){return terrainTypes.find(function(t){return t.id===id;})||null;}
+function tierName(id){var t=tiers.find(function(t){return t.id===id;});return t?t.name:'';}
+function tierIndex(id){return tiers.findIndex(function(t){return t.id===id;});}
+function countDirect(did){var n=0,ks=Object.keys(hexData);for(var i=0;i<ks.length;i++)if(hexData[ks[i]].domain===did)n++;return n;}
+function countEffective(did){var n=0,stack=[did],vis={};while(stack.length){var cur=stack.pop();if(vis[cur])continue;vis[cur]=true;n+=countDirect(cur);domains.forEach(function(d){if(d.liege===cur)stack.push(d.id);});}return n;}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function rgba(hex,a){var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return'rgba('+r+','+g+','+b+','+a+')';}
+
+// Walk up the liege chain to find the ancestor at the given tier.
+// Returns the domain object if found, or null.
+function ancestorAtTier(domainId, tierId){
+  var vis={}, cur=domainId;
+  while(cur){
+    if(vis[cur])break; vis[cur]=true;
+    var d=findDomain(cur); if(!d)break;
+    if(d.tier===tierId)return d;
+    cur=d.liege;
+  }
+  return null;
+}
+
+// Resolve what color to show for a hex's domain in the current view mode.
+// Returns a domain object (which has .color, .alpha) or null.
+function resolveDisplay(domainId){
+  if(!domainId)return null;
+  if(viewLayer==='domain-direct')return findDomain(domainId);
+  if(viewLayer==='domain-tier'){
+    if(!viewTierLayer)return findDomain(domainId); // no tier selected, show direct
+    var ancestor=ancestorAtTier(domainId, viewTierLayer);
+    // If no ancestor at the chosen tier, show the domain's own top-level ancestor
+    // so personal domains of rulers above the tier still appear
+    if(ancestor)return ancestor;
+    // Walk to the topmost domain and show that
+    var cur=domainId, prev=domainId, vis={};
+    while(cur){
+      if(vis[cur])break; vis[cur]=true;
+      var d=findDomain(cur); if(!d)break;
+      prev=cur;
+      if(!d.liege)break;
+      cur=d.liege;
+    }
+    return findDomain(prev);
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════
+// DRAWING
+// ═══════════════════════════════════════
+function resizeCanvas(){canvas.width=mapW;canvas.height=mapH;}
+function applyTransform(){canvas.style.transform='translate('+viewX+'px,'+viewY+'px) scale('+viewScale+')';}
+
+function redraw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(mapImg){ctx.drawImage(mapImg,0,0,mapW,mapH);}
+  else{
+    ctx.fillStyle='#1e2530';ctx.fillRect(0,0,mapW,mapH);
+    ctx.fillStyle='#3a4560';ctx.font='16px system-ui';ctx.textAlign='center';
+    ctx.fillText('Load a map image to begin',mapW/2,mapH/2);ctx.textAlign='left';
+  }
+  var sz=hexSize,flat=flatTop,ox=gridOffX,oy=gridOffY;
+  var cSp=flat?sz*1.5:sz*Math.sqrt(3), rSp=flat?sz*Math.sqrt(3):sz*1.5;
+  var cols=Math.ceil(mapW/cSp)+4, rows=Math.ceil(mapH/rSp)+4;
+  var c0=Math.floor(-ox/cSp)-2, r0=Math.floor(-oy/rSp)-2;
+
+  // ── 1. FILLS (slightly inset so grid shows through) ──
+  for(var col=c0;col<c0+cols;col++){
+    for(var row=r0;row<r0+rows;row++){
+      var key=hkey(col,row), hd=hexData[key], fc=null, fa=0;
+      if((viewLayer==='domain-direct'||viewLayer==='domain-tier')&&hd&&hd.domain){
+        var resolved=resolveDisplay(hd.domain);
+        if(resolved){fc=resolved.color;fa=Math.min(1,(resolved.alpha||50)/100*fillOpacity*2);}
+      }else if(viewLayer==='terrain'&&hd&&hd.terrain){
+        var t=findTerrain(hd.terrain);if(t){fc=t.color;fa=Math.min(1,fillOpacity*1.3);}
+      }else if(viewLayer==='civ'&&hd&&hd.civ){
+        fc=civColors[hd.civ]||null;fa=Math.min(1,fillOpacity*1.4);
+      }
+      if(fc){
+        var ctr=hexCenter(col,row,sz,flat,ox,oy);
+        var corners=hexCorners(ctr[0],ctr[1],sz*0.95,flat);
+        ctx.fillStyle=rgba(fc,fa);
+        ctx.beginPath();ctx.moveTo(corners[0][0],corners[0][1]);
+        for(var ci=1;ci<6;ci++)ctx.lineTo(corners[ci][0],corners[ci][1]);
+        ctx.closePath();ctx.fill();
+      }
+    }
+  }
+
+  // ── 2. REGIONAL OUTLINES ──
+  // Core routine: collect all edges where adjacent hexes belong to different groups,
+  // then draw each group's boundary edges as a single stroked path.
+  // Rule: a hex is "in a group" if getGroupId(hex.domain) returns non-null.
+  // An edge is a boundary if the neighbor's group differs (including null=outside).
+
+  function drawRegionOutlines(getGroupId, strokeStyle, lineWidthPx){
+    // strokeStyle can be a plain color string OR a function(groupId)->color
+    var styleFn = (typeof strokeStyle === 'function') ? strokeStyle : function(){return strokeStyle;};
+    var groupEdges = {};
+    for(var col=c0;col<c0+cols;col++){
+      for(var row=r0;row<r0+rows;row++){
+        var key=hkey(col,row), hd=hexData[key];
+        var gid=(hd&&hd.domain)?getGroupId(hd.domain):null;
+        if(gid===null||gid===undefined)continue;
+        var ctr=hexCenter(col,row,sz,flat,ox,oy);
+        var corners=hexCorners(ctr[0],ctr[1],sz,flat);
+        var ns=nbrs(col,row);
+        for(var ni=0;ni<6;ni++){
+          var nhd2=hexData[hkey(ns[ni][0],ns[ni][1])];
+          var ngid=(nhd2&&nhd2.domain)?getGroupId(nhd2.domain):null;
+          if(ngid!==gid){
+            if(!groupEdges[gid])groupEdges[gid]=[];
+            groupEdges[gid].push([corners[ni], corners[(ni+1)%6]]);
+          }
+        }
+      }
+    }
+    var gids=Object.keys(groupEdges);
+    for(var gi=0;gi<gids.length;gi++){
+      var gid=gids[gi];
+      var style=styleFn(gid);
+      if(!style)continue;
+      ctx.save();
+      ctx.strokeStyle=style;
+      ctx.lineWidth=lineWidthPx;
+      ctx.lineCap='round';ctx.lineJoin='round';
+      var edges=groupEdges[gid];
+      ctx.beginPath();
+      for(var ei=0;ei<edges.length;ei++){
+        ctx.moveTo(edges[ei][0][0],edges[ei][0][1]);
+        ctx.lineTo(edges[ei][1][0],edges[ei][1][1]);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // 2a. Thin domain-colored perimeter for each visible domain region
+  if(viewLayer==='domain-direct'||viewLayer==='domain-tier'){
+    drawRegionOutlines(
+      function(domId){var r=resolveDisplay(domId);return r?r.id:null;},
+      function(gid){var d=findDomain(gid);return d?rgba(d.color,Math.min(1,gridOpacity*2.2)):null;},
+      Math.max(1.5,sz*0.055)
+    );
+  }
+
+  // 2b. Outline-tier: thick border around domains that share an ancestor at outlineTierLayer.
+  // ancestorAtTier walks the liege chain upward and returns the first domain matching the tier.
+  // Returns null if none found -> those hexes are "outside" and border correctly forms around them.
+  if(outlineTierLayer&&(viewLayer==='domain-direct'||viewLayer==='domain-tier')){
+    var outlineCol=document.getElementById('outline-color').value||'#cc2222';
+    drawRegionOutlines(
+      function(domId){
+        // Special case: if the domain itself IS at or above the outline tier,
+        // include it in its own group (it IS the ancestor).
+        var d=findDomain(domId);
+        if(!d)return null;
+        if(d.tier===outlineTierLayer)return d.id; // domain is at exactly this tier
+        // Check if domain is above this tier (lower tier index = higher in hierarchy)
+        var myTierIdx=tierIndex(d.tier);
+        var outlineTierIdx=tierIndex(outlineTierLayer);
+        if(myTierIdx>=0&&outlineTierIdx>=0&&myTierIdx<outlineTierIdx){
+          // This domain is above the outline tier - it is its own group
+          return d.id;
+        }
+        // Otherwise walk up to find the ancestor at outline tier
+        var anc=ancestorAtTier(domId,outlineTierLayer);
+        return anc?anc.id:null;
+      },
+      function(gid){return outlineCol;},
+      Math.max(3.5,sz*0.14)
+    );
+  }
+
+  // 2c. Per-domain borders (own + sub-domain).
+  // showBorder = border around THIS domain's directly-owned hexes.
+  // showSubBorders = borders around all direct vassals (each as their own region).
+  if(viewLayer==='domain-direct'||viewLayer==='domain-tier'){
+    var borderedIds={};
+    domains.forEach(function(bd){
+      if(bd.showBorder)borderedIds[bd.id]={color:bd.borderColor||'#111111'};
+    });
+    domains.forEach(function(parent){
+      if(!parent.showSubBorders)return;
+      domains.forEach(function(child){
+        if(child.liege===parent.id&&!borderedIds[child.id])
+          borderedIds[child.id]={color:child.borderColor||'#222222'};
+      });
+    });
+    Object.keys(borderedIds).forEach(function(bid){
+      var bColor=borderedIds[bid].color;
+      drawRegionOutlines(
+        function(domId){return domId===bid?bid:null;},
+        bColor,
+        Math.max(3.0,sz*0.12)
+      );
+    });
+  }
+
+  // ── 3. GRID LINES (drawn on top of everything, always black) ──
+  if(gridOpacity>0.02){
+    ctx.save();ctx.globalAlpha=gridOpacity*0.7;
+    ctx.strokeStyle='#000000';ctx.lineWidth=0.7;
+    for(var col=c0;col<c0+cols;col++){
+      for(var row=r0;row<r0+rows;row++){
+        var ctr=hexCenter(col,row,sz,flat,ox,oy);
+        var corners=hexCorners(ctr[0],ctr[1],sz,flat);
+        ctx.beginPath();ctx.moveTo(corners[0][0],corners[0][1]);
+        for(var ci=1;ci<6;ci++)ctx.lineTo(corners[ci][0],corners[ci][1]);
+        ctx.closePath();ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
+  // ── 5. ROADS ──
+  var rks=Object.keys(roads);
+  for(var ri=0;ri<rks.length;ri++){
+    var pts=rks[ri].split('|');if(pts.length<2)continue;
+    var a=pts[0].split(','),b=pts[1].split(',');
+    var ca=hexCenter(+a[0],+a[1],sz,flat,ox,oy),cb=hexCenter(+b[0],+b[1],sz,flat,ox,oy);
+    ctx.save();ctx.strokeStyle=roads[rks[ri]].color||'#c8a050';ctx.lineWidth=Math.max(1.5,sz*.07);ctx.lineCap='round';ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.moveTo(ca[0],ca[1]);ctx.lineTo(cb[0],cb[1]);ctx.stroke();ctx.restore();
+  }
+  if(roadStart&&paintMode==='road'){
+    var rp=roadStart.split(','),rc=hexCenter(+rp[0],+rp[1],sz,flat,ox,oy);
+    ctx.save();ctx.strokeStyle='rgba(255,200,80,.7)';ctx.lineWidth=2;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.arc(rc[0],rc[1],sz*.4,0,Math.PI*2);ctx.stroke();ctx.restore();
+  }
+
+  // ── 6. STRONGHOLD MARKERS ──
+  for(var di=0;di<domains.length;di++){
+    var dm=domains[di];if(!dm.stronghold)continue;
+    var sp=dm.stronghold.split(',');if(sp.length<2)continue;
+    var sc=hexCenter(+sp[0],+sp[1],sz,flat,ox,oy);
+    ctx.save();ctx.font=Math.max(9,sz*.5)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=3;
+    ctx.fillStyle=dm.shtype==='city'?'#ffe060':'#ffffff';
+    ctx.fillText(dm.shtype==='city'?'\u2605':'\u25C6',sc[0],sc[1]);
+    ctx.restore();
+  }
+
+  // ── 7. POIs ──
+  var hks=Object.keys(hexData);
+  for(var hi=0;hi<hks.length;hi++){
+    var hd2=hexData[hks[hi]];if(!hd2.pois||!hd2.pois.length)continue;
+    var pp=hks[hi].split(','),pc=hexCenter(+pp[0],+pp[1],sz,flat,ox,oy);
+    for(var pi=0;pi<hd2.pois.length;pi++){
+      ctx.save();ctx.font=Math.max(8,sz*.44)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=2;ctx.fillStyle='#fff';
+      ctx.fillText(hd2.pois[pi].icon||'\u25C6',pc[0],pc[1]+sz*.2);ctx.restore();
+    }
+  }
+
+  applyTransform();
+  updateLegend();
+}
+
+// ═══════════════════════════════════════
+// ZOOM / PAN
+// ═══════════════════════════════════════
+function clampView(){
+  var ww=wrap.clientWidth,wh=wrap.clientHeight;
+  viewX=Math.min(ww*.85,Math.max(-(mapW*viewScale-ww*.15),viewX));
+  viewY=Math.min(wh*.85,Math.max(-(mapH*viewScale-wh*.15),viewY));
+}
+function w2c(cx,cy){var r=wrap.getBoundingClientRect();return[(cx-r.left-viewX)/viewScale,(cy-r.top-viewY)/viewScale];}
+
+wrap.addEventListener('wheel',function(e){
+  e.preventDefault();
+  var rect=wrap.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;
+  if(e.ctrlKey){
+    var cbx=(mx-viewX)/viewScale,cby=(my-viewY)/viewScale;
+    viewScale=Math.min(10,Math.max(0.05,viewScale*(e.deltaY<0?1.12:1/1.12)));
+    viewX=mx-cbx*viewScale;viewY=my-cby*viewScale;
+  }else{
+    viewX+=(e.shiftKey?-e.deltaY:(e.deltaX?-e.deltaX:0));
+    viewY+=(e.shiftKey?0:-e.deltaY);
+  }
+  clampView();applyTransform();
+},{passive:false});
+
+wrap.addEventListener('mousedown',function(e){
+  if(e.button===1){midDrag=true;dragSX=e.clientX;dragSY=e.clientY;dragVX=viewX;dragVY=viewY;wrap.classList.add('cur-grabbing');e.preventDefault();return;}
+  if(e.button!==0)return;
+  var pos=w2c(e.clientX,e.clientY);
+  if(pickingSH){
+    var hp=pixelToHex(pos[0],pos[1]),d=findDomain(pickingSHfor);
+    if(d)d.stronghold=hkey(hp[0],hp[1]);
+    pickingSH=false;openDomainModal(pickingSHfor,shStash);pickingSHfor=null;shStash=null;return;
+  }
+  if(spaceDown||editMode==='align'){
+    isDragging=true;spaceDrag=spaceDown;dragSX=e.clientX;dragSY=e.clientY;
+    if(editMode==='align'&&!spaceDown){dragGX=gridOffX;dragGY=gridOffY;}else{dragVX=viewX;dragVY=viewY;}
+    wrap.classList.add('cur-grabbing');return;
+  }
+  if(editMode==='inspect'){doInspect(pos);return;}
+  isPainting=true;doPaint(pos,e);
+});
+
+wrap.addEventListener('mousemove',function(e){
+  var pos=w2c(e.clientX,e.clientY),hp=pixelToHex(pos[0],pos[1]);
+  document.getElementById('scoords').textContent='col '+hp[0]+' row '+hp[1];
+  if(midDrag){viewX=dragVX+(e.clientX-dragSX);viewY=dragVY+(e.clientY-dragSY);clampView();applyTransform();return;}
+  if(isDragging){
+    var dx=e.clientX-dragSX,dy=e.clientY-dragSY;
+    if(editMode==='align'&&!spaceDrag){gridOffX=dragGX+dx/viewScale;gridOffY=dragGY+dy/viewScale;redraw();setStatus('Grid ('+gridOffX.toFixed(1)+','+gridOffY.toFixed(1)+')');}
+    else{viewX=dragVX+dx;viewY=dragVY+dy;clampView();applyTransform();}
+    return;
+  }
+  if(isPainting)doPaint(pos,e);
+  if(editMode==='inspect')showInspector(pos,hp);else inspector.classList.remove('vis');
+});
+
+wrap.addEventListener('mouseup',function(){isPainting=false;isDragging=false;midDrag=false;spaceDrag=false;if(!pickingSH)wrap.className='';});
+wrap.addEventListener('mouseleave',function(){isPainting=false;isDragging=false;midDrag=false;spaceDrag=false;inspector.classList.remove('vis');document.getElementById('scoords').textContent='';});
+
+// ═══════════════════════════════════════
+// PAINT
+// ═══════════════════════════════════════
+function doPaint(pos,e){
+  var hp=pixelToHex(pos[0],pos[1]),key=hkey(hp[0],hp[1]),erasing=(editMode==='erase')||altDown;
+  if(!isDragging)pushUndo();  // save state before each stroke
+  if(paintMode==='road'){
+    if(erasing){var rks=Object.keys(roads);for(var i=0;i<rks.length;i++)if(rks[i].indexOf(key)>=0)delete roads[rks[i]];redraw();return;}
+    if(!roadStart){roadStart=key;redraw();setStatus('Road started &#8212; click another hex to connect, Esc to cancel');}
+    else{if(roadStart!==key){var p=roadStart.split(',');roads[roadKey(+p[0],+p[1],hp[0],hp[1])]={color:document.getElementById('road-color').value};}roadStart=null;redraw();setStatus('Road added.');}
+    return;
+  }
+  if(paintMode==='poi'&&!erasing&&!isDragging){pendingPOIhex=key;openPOIModal();return;}
+  var hd=getHex(key);
+  if(erasing){
+    if(paintMode==='domain')hd.domain='';
+    else if(paintMode==='terrain')hd.terrain='';
+    else if(paintMode==='civ'){hd.civ='';hd.civOverride=false;}
+    else if(paintMode==='poi')hd.pois=[];
+  }else{
+    if(paintMode==='domain'){if(!activeDomain){setStatus('Select a domain first.');return;}hd.domain=activeDomain;}
+    else if(paintMode==='terrain'){var tv=document.getElementById('sel-paint-terrain').value;if(!tv){setStatus('Select terrain first.');return;}hd.terrain=tv;}
+    else if(paintMode==='civ'){hd.civ=document.getElementById('sel-paint-civ').value;hd.civOverride=true;}
+  }
+  redraw();renderDomainList();
+  if(paintMode==='domain'&&!erasing){var d=findDomain(activeDomain);if(d)setStatus('Painted ('+hp[0]+','+hp[1]+') \u2192 '+d.name+' ('+countDirect(d.id)+' direct, '+countEffective(d.id)+' total)');}
+}
+
+// ═══════════════════════════════════════
+// INSPECT
+// ═══════════════════════════════════════
+function doInspect(pos){var hp=pixelToHex(pos[0],pos[1]);showInspector(pos,hp);}
+function showInspector(pos,hp){
+  var key=hkey(hp[0],hp[1]),hd=hexData[key],lines=['<strong>('+hp[0]+','+hp[1]+')</strong>'];
+  var dmStr='\u2014';if(hd&&hd.domain){var d=findDomain(hd.domain);if(d)dmStr=d.name;}
+  lines.push('<div class="irow"><span class="il">Domain</span><span class="iv">'+esc(dmStr)+'</span></div>');
+  if(hd&&hd.domain){
+    var chain=[],cur=findDomain(hd.domain),vis={};
+    while(cur&&cur.liege&&!vis[cur.id]){vis[cur.id]=true;cur=findDomain(cur.liege);if(cur)chain.push(cur.name);}
+    if(chain.length)lines.push('<div class="irow"><span class="il">Realm chain</span><span class="iv">'+esc(chain.join(' \u2192 '))+'</span></div>');
+  }
+  var tStr='\u2014';if(hd&&hd.terrain){var t=findTerrain(hd.terrain);if(t)tStr=t.name;}
+  lines.push('<div class="irow"><span class="il">Terrain</span><span class="iv">'+esc(tStr)+'</span></div>');
+  var cStr=hd&&hd.civ?hd.civ+(hd.civOverride?' *':''):'\u2014';
+  lines.push('<div class="irow"><span class="il">Civ</span><span class="iv">'+esc(cStr)+'</span></div>');
+  var poi=hd&&hd.pois&&hd.pois.length?hd.pois.map(function(p){return p.icon+' '+p.name;}).join(', '):'\u2014';
+  lines.push('<div class="irow"><span class="il">POIs</span><span class="iv">'+esc(poi)+'</span></div>');
+  inspector.innerHTML=lines.join('');inspector.classList.add('vis');
+}
+
+// ═══════════════════════════════════════
+// AUTO CIV
+// ═══════════════════════════════════════
+function autoCalcCiv(){
+  var cities=[];
+  domains.forEach(function(d){if(d.shtype==='city'&&d.stronghold){var sp=d.stronghold.split(',');if(sp.length>=2)cities.push([+sp[0],+sp[1]]);}});
+  var sz=hexSize,flat=flatTop,ox=gridOffX,oy=gridOffY;
+  var cSp=flat?sz*1.5:sz*Math.sqrt(3),rSp=flat?sz*Math.sqrt(3):sz*1.5;
+  var c0=Math.floor(-ox/cSp)-1,r0=Math.floor(-oy/rSp)-1;
+  var cols=Math.ceil(mapW/cSp)+2,rows=Math.ceil(mapH/rSp)+2,n=0;
+  for(var col=c0;col<c0+cols;col++)for(var row=r0;row<r0+rows;row++){
+    var key=hkey(col,row),hd=hexData[key];
+    if(hd&&hd.civOverride)continue;
+    var minD=Infinity;for(var ci=0;ci<cities.length;ci++)minD=Math.min(minD,hexDist(col,row,cities[ci][0],cities[ci][1]));
+    var civ=cities.length===0?'outlands':minD<=8?'civilized':minD<=12?'borderlands':'outlands';
+    if(hd&&(hd.domain||hd.terrain)){hd.civ=civ;n++;}
+  }
+  redraw();setStatus('Auto-calc civ for '+n+' hexes (* = manual override, skipped)');
+}
+
+// ═══════════════════════════════════════
+// MODES
+// ═══════════════════════════════════════
+function setEM(m){
+  editMode=m;
+  ['paint','align','erase','inspect'].forEach(function(id){var b=document.getElementById('btn-'+id);if(b)b.classList.toggle('on',id===m);});
+  if(!pickingSH){
+    if(m==='align'||spaceDown)wrap.className='cur-grab';
+    else if(m==='erase')wrap.className='cur-cell';
+    else if(m==='inspect')wrap.className='cur-pointer';
+    else wrap.className='';
+  }
+  roadStart=null;
+  setStatus({paint:'Paint. Alt+click=erase. Space+drag=pan.',align:'Align: drag grid. Arrow keys fine-tune.',erase:'Erase: click/drag to remove.',inspect:'Inspect: hover for hex data.'}[m]||'');
+}
+function setPM(m){
+  paintMode=m;
+  ['domain','terrain','civ','road','poi'].forEach(function(id){document.getElementById('pp-'+id).classList.toggle('on',id===m);});
+  ['domain','terrain','civ','road','poi'].forEach(function(id){var el=document.getElementById('pm-'+id+'-ui');if(el)el.style.display=id===m?'':'none';});
+  roadStart=null;
+}
+function onLayerChange(){
+  viewLayer=document.getElementById('sel-layer').value;
+  var isTier=(viewLayer==='domain-tier');
+  document.getElementById('tier-layer-row').style.display=isTier?'':'none';
+  document.getElementById('outline-tier-row').style.display=isTier?'':'none';
+  document.getElementById('outline-color-row').style.display=isTier?'':'none';
+  redraw();
+}
+
+// ═══════════════════════════════════════
+// MODAL TABS
+// ═══════════════════════════════════════
+function switchModalTab(name){
+  document.querySelectorAll('.modal-tab').forEach(function(t,i){
+    t.classList.toggle('on', ['general','econ'][i]===name);
+  });
+  document.querySelectorAll('.modal-pane').forEach(function(p){
+    p.classList.toggle('on', p.id==='modal-pane-'+name);
+  });
+}
+
+// ═══════════════════════════════════════
+// COMMODITY HELPERS
+// ═══════════════════════════════════════
+function buildCommodityRows(demandMap){
+  var el=document.getElementById('dm-commodity-rows');el.innerHTML='';
+  commodities.forEach(function(c){
+    var val=demandMap&&demandMap[c.id]!==undefined?demandMap[c.id]:0;
+    var row=document.createElement('div');row.className='commodity-row';
+    row.innerHTML='<span class="cname">'+esc(c.name)+'</span>'+
+      '<input type="number" step="0.1" min="-10" max="10" value="'+val+'" data-cid="'+c.id+'" title="Demand modifier for '+esc(c.name)+'">';
+    el.appendChild(row);
+  });
+}
+function readCommodityRows(){
+  var map={};
+  document.querySelectorAll('#dm-commodity-rows input').forEach(function(inp){
+    var v=parseFloat(inp.value)||0;
+    if(v!==0)map[inp.dataset.cid]=v;
+  });
+  return map;
+}
+function renderCommodityList(){
+  var el=document.getElementById('commodity-list');if(!el)return;el.innerHTML='';
+  commodities.forEach(function(c){
+    var div=document.createElement('div');div.className='tt-item';
+    div.innerHTML='<input type="text" value="'+esc(c.name)+'"><span class="tt-del">\u00D7</span>';
+    div.querySelector('input').addEventListener('input',function(){c.name=this.value;});
+    div.querySelector('.tt-del').addEventListener('click',function(){
+      commodities=commodities.filter(function(cc){return cc.id!==c.id;});
+      renderCommodityList();
+    });
+    el.appendChild(div);
+  });
+}
+function addCommodity(){
+  commodities.push({id:'c_'+Date.now(),name:'New commodity'});
+  renderCommodityList();
+}
+
+// ═══════════════════════════════════════
+// COLOR PRESETS
+// ═══════════════════════════════════════
+function buildColorPresets(selectedColor){
+  var el=document.getElementById('color-presets');el.innerHTML='';
+  PRESET_COLORS.forEach(function(c){
+    var div=document.createElement('div');
+    div.className='cp'+(c===selectedColor?' on':'');
+    div.style.background=c;
+    div.title=c;
+    div.addEventListener('click',function(){
+      document.getElementById('dm-color').value=c;
+      syncColorPicker(c);
+    });
+    el.appendChild(div);
+  });
+}
+function syncColorPicker(val){
+  document.getElementById('dm-color').value=val;
+  var divs=document.querySelectorAll('.cp');
+  divs.forEach(function(d){d.classList.toggle('on',d.style.background===val||rgbToHex(d.style.background)===val);});
+}
+function rgbToHex(rgb){
+  var m=rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+  if(!m)return rgb;
+  return '#'+[+m[1],+m[2],+m[3]].map(function(v){return v.toString(16).padStart(2,'0');}).join('');
+}
+
+// ═══════════════════════════════════════
+// DOMAIN MODAL
+// ═══════════════════════════════════════
+function openDomainModal(domainId,stash){
+  editingDomainId=domainId;
+  var d=domainId?findDomain(domainId):null;
+  document.getElementById('dm-title').textContent=d?'Edit: '+d.name:'New Domain';
+  document.getElementById('dm-delete-btn').style.display=d?'':'none';
+  var color,alpha;
+  if(stash){
+    document.getElementById('dm-name').value=stash.name||'';
+    document.getElementById('dm-ruler').value=stash.ruler||'';
+    color=stash.color||PRESET_COLORS[domains.length%PRESET_COLORS.length];
+    alpha=stash.alpha||50;
+    document.getElementById('dm-shtype').value=stash.shtype||'';
+    document.getElementById('dm-show-border').checked=!!(stash.showBorder);
+    document.getElementById('dm-border-color').value=stash.borderColor||'#111111';
+    refreshDropdowns(domainId);
+    document.getElementById('dm-tier').value=stash.tier||'';
+    document.getElementById('dm-liege').value=stash.liege||'';
+  }else{
+    document.getElementById('dm-name').value=d?d.name:'';
+    document.getElementById('dm-ruler').value=d&&d.ruler?d.ruler:'';
+    color=d?d.color:PRESET_COLORS[domains.length%PRESET_COLORS.length];
+    alpha=d&&d.alpha!==undefined?d.alpha:50;
+    document.getElementById('dm-shtype').value=d&&d.shtype?d.shtype:'';
+    document.getElementById('dm-show-border').checked=!!(d&&d.showBorder);
+    document.getElementById('dm-border-color').value=d&&d.borderColor?d.borderColor:'#111111';
+    refreshDropdowns(domainId);
+    document.getElementById('dm-tier').value=d&&d.tier?d.tier:'';
+    document.getElementById('dm-liege').value=d&&d.liege?d.liege:'';
+  }
+  document.getElementById('dm-color').value=color;
+  document.getElementById('dm-alpha').value=alpha;
+  document.getElementById('dm-alpha-val').textContent=alpha+'%';
+  buildColorPresets(color);
+  var shLabel=d&&d.stronghold?d.stronghold:'none';
+  document.getElementById('dm-sh-label').textContent=shLabel;
+  document.getElementById('dm-sh-btn').textContent=(d&&d.stronghold)?'\u2605 Change stronghold':'\u2605 Pick on map';
+  // Load econ fields
+  var econ=stash||d||{};
+  document.getElementById('dm-morale').value=econ.morale!==undefined?econ.morale:'';
+  document.getElementById('dm-market-class').value=econ.marketClass!==undefined?econ.marketClass:'';
+  document.getElementById('dm-peasant-fam').value=econ.peasantFam!==undefined?econ.peasantFam:'';
+  document.getElementById('dm-urban-fam').value=econ.urbanFam!==undefined?econ.urbanFam:'';
+  buildCommodityRows(econ.demandMods||{});
+  // Load sub-border toggle
+  document.getElementById('dm-show-sub-borders').checked=!!(stash?stash.showSubBorders:d&&d.showSubBorders);
+  // Reset to general tab
+  switchModalTab('general');
+  document.getElementById('domain-modal').classList.add('vis');
+  setTimeout(function(){document.getElementById('dm-name').focus();},40);
+}
+function saveDomainModal(){
+  var name=document.getElementById('dm-name').value.trim();if(!name){document.getElementById('dm-name').focus();return;}
+  var d=editingDomainId?findDomain(editingDomainId):null,isNew=!d;
+  if(!d){d={id:'d'+(++domainCounter)+'_'+Date.now(),stronghold:'',shtype:''};domains.push(d);}
+  d.name=name;d.ruler=document.getElementById('dm-ruler').value.trim();
+  d.color=document.getElementById('dm-color').value;d.alpha=parseInt(document.getElementById('dm-alpha').value);
+  d.tier=document.getElementById('dm-tier').value;d.liege=document.getElementById('dm-liege').value;
+  d.shtype=document.getElementById('dm-shtype').value;
+  d.showBorder=document.getElementById('dm-show-border').checked;
+  d.showSubBorders=document.getElementById('dm-show-sub-borders').checked;
+  d.borderColor=document.getElementById('dm-border-color').value;
+  d.morale=parseFloat(document.getElementById('dm-morale').value)||0;
+  d.marketClass=parseInt(document.getElementById('dm-market-class').value)||0;
+  d.peasantFam=parseInt(document.getElementById('dm-peasant-fam').value)||0;
+  d.urbanFam=parseInt(document.getElementById('dm-urban-fam').value)||0;
+  d.demandMods=readCommodityRows();
+  activeDomain=d.id;
+  document.getElementById('cur-domain-name').textContent=d.name;
+  closeDomainModal();renderDomainList();renderHierarchy();refreshDropdowns(null);redraw();
+  setStatus((isNew?'Created':'Updated')+': '+d.name+'. Now painting this domain.');
+}
+function closeDomainModal(){document.getElementById('domain-modal').classList.remove('vis');editingDomainId=null;}
+function deleteDomainFromModal(){var id=editingDomainId;if(!id||!confirm('Delete domain and clear its hexes?'))return;closeDomainModal();deleteDomain(id);}
+function deleteDomain(id){
+  domains=domains.filter(function(d){return d.id!==id;});
+  Object.keys(hexData).forEach(function(k){if(hexData[k].domain===id)hexData[k].domain='';});
+  domains.forEach(function(d){if(d.liege===id)d.liege='';});
+  if(activeDomain===id){activeDomain=domains.length?domains[0].id:null;document.getElementById('cur-domain-name').textContent=activeDomain?findDomain(activeDomain).name:'\u2014';}
+  renderDomainList();renderHierarchy();redraw();
+}
+function startPickSH(){
+  shStash={name:document.getElementById('dm-name').value,ruler:document.getElementById('dm-ruler').value,color:document.getElementById('dm-color').value,alpha:parseInt(document.getElementById('dm-alpha').value),tier:document.getElementById('dm-tier').value,liege:document.getElementById('dm-liege').value,shtype:document.getElementById('dm-shtype').value,showBorder:document.getElementById('dm-show-border').checked,showSubBorders:document.getElementById('dm-show-sub-borders').checked,borderColor:document.getElementById('dm-border-color').value,morale:parseFloat(document.getElementById('dm-morale').value)||0,marketClass:parseInt(document.getElementById('dm-market-class').value)||0,peasantFam:parseInt(document.getElementById('dm-peasant-fam').value)||0,urbanFam:parseInt(document.getElementById('dm-urban-fam').value)||0,demandMods:readCommodityRows()};
+  if(!editingDomainId){
+    var d={id:'d'+(++domainCounter)+'_'+Date.now(),stronghold:'',shtype:'',name:shStash.name||'New Domain',ruler:shStash.ruler||'',color:shStash.color,alpha:shStash.alpha,tier:shStash.tier||'',liege:shStash.liege||''};
+    domains.push(d);editingDomainId=d.id;
+  }
+  pickingSH=true;pickingSHfor=editingDomainId;
+  closeDomainModal();wrap.className='cur-crosshair';
+  setStatus('Click a hex to set as stronghold. Esc to cancel.');
+}
+function refreshDropdowns(excludeId){
+  var ts=document.getElementById('dm-tier'),curT=ts.value;
+  ts.innerHTML='<option value="">-- no tier --</option>';
+  tiers.forEach(function(t){ts.innerHTML+='<option value="'+t.id+'">'+esc(t.name)+'</option>';});
+  if(curT)ts.value=curT;
+  var ls=document.getElementById('dm-liege'),curL=ls.value;
+  ls.innerHTML='<option value="">-- none --</option>';
+  domains.forEach(function(d){if(d.id!==excludeId)ls.innerHTML+='<option value="'+d.id+'">'+esc(d.name)+(d.tier?' ('+tierName(d.tier)+')':'')+'</option>';});
+  if(curL)ls.value=curL;
+  var tl=document.getElementById('sel-tier-layer'),curTL=tl.value;
+  tl.innerHTML='<option value="">-- select --</option>';
+  tiers.forEach(function(t){tl.innerHTML+='<option value="'+t.id+'">'+esc(t.name)+'</option>';});
+  if(curTL)tl.value=curTL;
+  var ol=document.getElementById('sel-outline-tier'),curOL=ol.value;
+  ol.innerHTML='<option value="">None</option>';
+  tiers.forEach(function(t){ol.innerHTML+='<option value="'+t.id+'">'+esc(t.name)+'</option>';});
+  if(curOL)ol.value=curOL;
+  ol.addEventListener('change',function(){outlineTierLayer=this.value;redraw();});
+  // personal domain dropdown
+  var pd=document.getElementById('sel-personal-domain'),curPD=pd.value;
+  pd.innerHTML='<option value="">None</option>';
+  domains.forEach(function(d){pd.innerHTML+='<option value="'+d.id+'">'+esc(d.name)+'</option>';});
+  if(curPD)pd.value=curPD;
+}
+
+// ═══════════════════════════════════════
+// POI
+// ═══════════════════════════════════════
+function openPOIModal(){document.getElementById('pm-name').value='';document.getElementById('pm-icon').value='\u25C6';document.getElementById('pm-notes').value='';document.getElementById('poi-modal').classList.add('vis');setTimeout(function(){document.getElementById('pm-name').focus();},40);}
+function closePOIModal(){document.getElementById('poi-modal').classList.remove('vis');pendingPOIhex=null;}
+function savePOI(){if(!pendingPOIhex)return;var name=document.getElementById('pm-name').value.trim()||'POI';var icon=document.getElementById('pm-icon').value||'\u25C6';var notes=document.getElementById('pm-notes').value.trim();var hd=getHex(pendingPOIhex);hd.pois=hd.pois||[];hd.pois.push({id:'p'+(++poiCounter)+'_'+Date.now(),name:name,icon:icon,notes:notes});closePOIModal();redraw();renderPOIList();setStatus('Added POI: '+name);}
+
+// ═══════════════════════════════════════
+// SIDEBAR RENDERS
+// ═══════════════════════════════════════
+function toggleDomainBorder(d, ev){
+  ev.stopPropagation();
+  d.showBorder=!d.showBorder;
+  renderDomainList();redraw();
+}
+function toggleSubBorders(d, ev){
+  ev.stopPropagation();
+  d.showSubBorders=!d.showSubBorders;
+  renderDomainList();redraw();
+}
+
+function renderDomainList(){
+  var el=document.getElementById('domain-scroll');el.innerHTML='';
+  domains.forEach(function(d){
+    var direct=countDirect(d.id),eff=countEffective(d.id),cStr=direct+(eff>direct?' ('+eff+')':'');
+    var div=document.createElement('div');
+    div.className='domain-item'+(d.id===activeDomain?' on':'');
+    // Border toggle buttons: 'B' = own border, 'S' = show sub-domain borders
+    var bCls='dbtn'+(d.showBorder?' on':'');
+    var sCls='dbtn sub'+(d.showSubBorders?' on':'');
+    div.innerHTML=
+      '<div class="dh">'+
+        '<div class="dswatch" style="background:'+rgba(d.color,(d.alpha||50)/100)+'"></div>'+
+        '<span class="dname" title="'+esc(d.name)+'">'+esc(d.name)+'</span>'+
+        '<span class="dcount">'+cStr+'</span>'+
+        '<button class="'+bCls+'" data-border="1" title="Toggle border around this domain">□</button>'+
+        '<button class="'+sCls+'" data-subborder="1" title="Toggle borders for all sub-domains">⋯</button>'+
+        '<span class="ddel">×</span>'+
+      '</div>'+
+      '<div class="ddetail">'+
+        (d.tier?'<div class="dr"><span class="dl">Tier</span><span class="dv" style="font-style:italic;color:#888">'+esc(tierName(d.tier))+'</span></div>':'')+
+        (d.ruler?'<div class="dr"><span class="dl">Ruler</span><span class="dv">'+esc(d.ruler)+'</span></div>':'')+
+        (d.liege&&findDomain(d.liege)?'<div class="dr"><span class="dl">Liege</span><span class="dv dlink" data-lid="'+d.liege+'">'+esc(findDomain(d.liege).name)+'</span></div>':'')+
+        (d.stronghold?'<div class="dr"><span class="dl">Stronghold</span><span class="dv">'+d.stronghold+(d.shtype?'— '+d.shtype:'')+'</span></div>':'')+
+        '<div class="dr" style="margin-top:4px">'+
+        (d.peasantFam||d.urbanFam?'<span class="dl">Pop</span><span class="dv">'+
+          (d.peasantFam?d.peasantFam+'p ':'')+
+          (d.urbanFam?d.urbanFam+'u ':'')+
+          (d.marketClass?'Mkt'+d.marketClass:'')+
+        '</span></div><div class="dr">':'')+
+        (d.morale?'<span class="dl">Morale</span><span class="dv">'+d.morale+'</span></div><div class="dr">':'')+
+        '<span class="dv dlink" data-edit="'+d.id+'">✎ Edit…</span></div>'+
+      '</div>';
+    div.querySelector('.ddel').addEventListener('click',function(ev){ev.stopPropagation();deleteDomain(d.id);});
+    div.querySelector('[data-border]').addEventListener('click',function(ev){toggleDomainBorder(d,ev);});
+    div.querySelector('[data-subborder]').addEventListener('click',function(ev){toggleSubBorders(d,ev);});
+    div.querySelector('.dh').addEventListener('click',function(){activeDomain=d.id;document.getElementById('cur-domain-name').textContent=d.name;if(editMode==='align')setEM('paint');renderDomainList();showTab('domains');setStatus('Painting: '+d.name+(d.ruler?' ('+d.ruler+')':''));});
+    var el2=div.querySelector('[data-edit]');if(el2)el2.addEventListener('click',function(ev){ev.stopPropagation();openDomainModal(d.id);});
+    var ll=div.querySelector('[data-lid]');if(ll)ll.addEventListener('click',function(ev){ev.stopPropagation();activeDomain=d.liege;renderDomainList();var ld=findDomain(d.liege);if(ld)setStatus('Switched to: '+ld.name);});
+    el.appendChild(div);
+  });
+  updateLegend();
+}
+function renderHierarchy(){
+  var el=document.getElementById('hier-scroll');el.innerHTML='';
+  var ch={},roots=[];
+  domains.forEach(function(d){if(d.liege&&findDomain(d.liege)){if(!ch[d.liege])ch[d.liege]=[];ch[d.liege].push(d.id);}else roots.push(d.id);});
+  function node(id,depth){
+    var d=findDomain(id);if(!d)return;
+    var dir=countDirect(d.id),eff=countEffective(d.id);
+    var div=document.createElement('div');div.style.paddingLeft=(depth*14)+'px';div.className='hier-node'+(d.id===activeDomain?' on':'');
+    div.innerHTML='<div class="hier-dot" style="background:'+d.color+'"></div><span class="hier-name">'+esc(d.name)+'</span>'+(d.ruler?'<span class="hier-info">'+esc(d.ruler)+'</span>':'')+'<span class="hier-info" style="color:#4a7a9b">'+dir+(eff>dir?' ('+eff+')':'')+'</span>';
+    div.addEventListener('click',function(){activeDomain=d.id;document.getElementById('cur-domain-name').textContent=d.name;renderDomainList();renderHierarchy();showTab('domains');});
+    el.appendChild(div);if(ch[id])ch[id].forEach(function(cid){node(cid,depth+1);});
+  }
+  if(roots.length)roots.forEach(function(id){node(id,0);});
+  else{var m=document.createElement('div');m.style.cssText='padding:14px;font-size:11px;color:#444;text-align:center';m.textContent='Assign lieges to build the tree.';el.appendChild(m);}
+}
+function renderTiersList(){
+  var el=document.getElementById('tiers-list');el.innerHTML='';
+  tiers.forEach(function(t,i){
+    var div=document.createElement('div');div.className='tt-item';
+    div.innerHTML='<span style="font-size:10px;color:#555;width:14px;text-align:center;flex-shrink:0">'+(i+1)+'</span><input type="text" value="'+esc(t.name)+'"><span class="tt-del">\u00D7</span>';
+    div.querySelector('input').addEventListener('input',function(){t.name=this.value;renderDomainList();renderHierarchy();refreshDropdowns(null);});
+    div.querySelector('.tt-del').addEventListener('click',function(){tiers=tiers.filter(function(tt){return tt.id!==t.id;});domains.forEach(function(d){if(d.tier===t.id)d.tier='';});renderTiersList();renderDomainList();renderHierarchy();refreshDropdowns(null);});
+    el.appendChild(div);
+  });
+}
+function renderTerrainList(){
+  var el=document.getElementById('terrain-list');el.innerHTML='';
+  terrainTypes.forEach(function(t){
+    var div=document.createElement('div');div.className='tt-item';
+    div.innerHTML='<input type="color" value="'+t.color+'"><input type="text" value="'+esc(t.name)+'"><span class="tt-del">\u00D7</span>';
+    div.querySelector('input[type=color]').addEventListener('input',function(){t.color=this.value;redraw();});
+    div.querySelector('input[type=text]').addEventListener('input',function(){t.name=this.value;updateTerrainDD();});
+    div.querySelector('.tt-del').addEventListener('click',function(){terrainTypes=terrainTypes.filter(function(tt){return tt.id!==t.id;});renderTerrainList();updateTerrainDD();});
+    el.appendChild(div);
+  });
+  updateTerrainDD();
+}
+function renderCivColors(){
+  var el=document.getElementById('civdef-list');el.innerHTML='';
+  [['unsettled','Unsettled'],['civilized','Civilized'],['borderlands','Borderlands'],['outlands','Outlands']].forEach(function(p){
+    var div=document.createElement('div');div.className='tt-item';
+    div.innerHTML='<input type="color" value="'+civColors[p[0]]+'"><span class="tt-name">'+p[1]+'</span>';
+    div.querySelector('input').addEventListener('input',function(){civColors[p[0]]=this.value;redraw();});
+    el.appendChild(div);
+  });
+}
+function renderPOIList(){
+  var el=document.getElementById('poi-scroll');el.innerHTML='';
+  var all=[];Object.keys(hexData).forEach(function(key){var hd=hexData[key];if(hd.pois)hd.pois.forEach(function(p){all.push({key:key,poi:p});});});
+  if(!all.length){var m=document.createElement('div');m.style.cssText='padding:14px;font-size:11px;color:#444;text-align:center';m.textContent='No POIs yet.';el.appendChild(m);return;}
+  all.forEach(function(item){
+    var div=document.createElement('div');div.className='poi-item';
+    div.innerHTML='<span class="poi-icon-display">'+esc(item.poi.icon||'\u25C6')+'</span><span class="poi-name" title="'+esc(item.poi.notes||'')+'">'+esc(item.poi.name)+'</span><span class="poi-coords">'+item.key+'</span><span class="poi-del">\u00D7</span>';
+    div.querySelector('.poi-del').addEventListener('click',function(ev){ev.stopPropagation();var hd=hexData[item.key];if(hd)hd.pois=hd.pois.filter(function(p){return p.id!==item.poi.id;});renderPOIList();redraw();});
+    el.appendChild(div);
+  });
+}
+function updateLegend(){
+  var el=document.getElementById('legend-body'),html='';
+  if(viewLayer==='domain-direct'||viewLayer==='domain-tier'){
+    var show=domains;if(viewLayer==='domain-tier'&&viewTierLayer)show=domains.filter(function(d){return d.tier===viewTierLayer;});
+    show.forEach(function(d){var dir=countDirect(d.id),eff=countEffective(d.id),cnt=dir+(eff>dir?' ('+eff+')':'');html+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div style="width:10px;height:10px;border-radius:2px;background:'+d.color+';flex-shrink:0"></div><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:#aaa">'+esc(d.name)+'</span><span style="font-size:10px;color:#5b8dd9">'+cnt+'</span></div>';});
+    if(!html)html='<span style="color:#444;font-size:10px">No domains yet.</span>';
+  }else if(viewLayer==='terrain'){terrainTypes.forEach(function(t){html+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div style="width:10px;height:10px;border-radius:2px;background:'+t.color+';flex-shrink:0"></div><span style="font-size:10px;color:#aaa">'+esc(t.name)+'</span></div>';});}
+  else if(viewLayer==='civ'){[['unsettled','Unsettled'],['civilized','Civilized'],['borderlands','Borderlands'],['outlands','Outlands']].forEach(function(p){html+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div style="width:10px;height:10px;border-radius:2px;background:'+civColors[p[0]]+';border:1px solid #444;flex-shrink:0"></div><span style="font-size:10px;color:#aaa">'+p[1]+'</span></div>';});}
+  el.innerHTML=html||'<span style="color:#444;font-size:10px">\u2014</span>';
+}
+function addTier(){tiers.push({id:'t_'+Date.now(),name:'Level '+(tiers.length+1)});renderTiersList();refreshDropdowns(null);}
+function addTerrain(){terrainTypes.push({id:'tr_'+Date.now(),name:'New terrain',color:'#888888'});renderTerrainList();}
+function updateTerrainDD(){var sel=document.getElementById('sel-paint-terrain'),cur=sel.value;sel.innerHTML='<option value="">-- select --</option>';terrainTypes.forEach(function(t){sel.innerHTML+='<option value="'+t.id+'">'+esc(t.name)+'</option>';});if(cur)sel.value=cur;}
+
+// ═══════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════
+function showTab(name){
+  document.querySelectorAll('.sb-panel').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.sb-tab').forEach(function(t){t.classList.remove('on');});
+  document.getElementById('tab-'+name).classList.add('on');
+  var idx={view:0,domains:1,hier:2,world:3,pois:4}[name]||0;
+  document.querySelectorAll('.sb-tab')[idx].classList.add('on');
+  if(name==='world'){renderTiersList();renderTerrainList();renderCivColors();renderCommodityList();}
+  if(name==='hier')renderHierarchy();
+  if(name==='pois')renderPOIList();
+}
+
+// ═══════════════════════════════════════
+// FILE I/O
+// ═══════════════════════════════════════
+function triggerLoad(id){document.getElementById(id).click();}
+document.getElementById('map-in').addEventListener('change',function(e){
+  var f=e.target.files[0];if(!f)return;e.target.value='';
+  var url=URL.createObjectURL(f),img=new Image();
+  img.onload=function(){mapImg=img;mapW=img.naturalWidth;mapH=img.naturalHeight;resizeCanvas();var ww=wrap.clientWidth,wh=wrap.clientHeight;viewScale=Math.min(ww/mapW,wh/mapH)*.95;viewX=(ww-mapW*viewScale)/2;viewY=(wh-mapH*viewScale)/2;redraw();setStatus('Loaded '+f.name+' ('+mapW+'\u00D7'+mapH+'). Press A to align grid.');};
+  img.src=url;
+});
+document.getElementById('data-in').addEventListener('change',function(e){
+  var f=e.target.files[0];if(!f)return;e.target.value='';
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      var d=JSON.parse(ev.target.result);
+      hexData=d.hexData||{};roads=d.roads||{};domains=d.domains||[];
+      if(d.tiers&&d.tiers.length)tiers=d.tiers;
+      if(d.terrainTypes&&d.terrainTypes.length)terrainTypes=d.terrainTypes;
+      if(d.civColors)civColors=d.civColors;
+      if(d.commodities&&d.commodities.length)commodities=d.commodities;
+      domainCounter=domains.length;
+      if(d.hexSize)hexSize=d.hexSize;
+      if(d.gridOffX!==undefined)gridOffX=d.gridOffX;
+      if(d.gridOffY!==undefined)gridOffY=d.gridOffY;
+      if(d.flatTop!==undefined)flatTop=d.flatTop;
+      if(d.gridOpacity!==undefined)gridOpacity=d.gridOpacity;
+      if(d.fillOpacity!==undefined)fillOpacity=d.fillOpacity;
+      document.getElementById('sld-size').value=hexSize;
+      document.getElementById('val-size').textContent=hexSize;
+      document.getElementById('chk-flat').checked=flatTop;
+      document.getElementById('sld-grid').value=Math.round(gridOpacity*100);
+      document.getElementById('sld-fill').value=Math.round(fillOpacity*100);
+      if(domains.length){activeDomain=domains[0].id;document.getElementById('cur-domain-name').textContent=domains[0].name;}
+      renderDomainList();renderHierarchy();refreshDropdowns(null);updateTerrainDD();redraw();
+      setStatus('Loaded: '+domains.length+' domains, '+Object.keys(hexData).length+' hexes, '+Object.keys(roads).length+' roads.');
+    }catch(err){alert('Load error: '+err.message);}
+  };reader.readAsText(f);
+});
+var currentSaveFilename='hexmap.json';
+function saveJSON(saveAs){
+  if(saveAs||!currentSaveFilename){
+    var name=prompt('Save as filename:',currentSaveFilename||'hexmap.json');
+    if(!name)return;
+    if(!name.endsWith('.json'))name+='.json';
+    currentSaveFilename=name;
+  }
+  var d={hexSize:hexSize,gridOffX:gridOffX,gridOffY:gridOffY,flatTop:flatTop,gridOpacity:gridOpacity,fillOpacity:fillOpacity,tiers:tiers,terrainTypes:terrainTypes,civColors:civColors,commodities:commodities,domains:domains,hexData:hexData,roads:roads};
+  var blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=currentSaveFilename;a.click();
+  setStatus('Saved as '+currentSaveFilename+' \u2014 '+domains.length+' domains, '+Object.keys(hexData).length+' hexes.');
+}
+
+// ═══════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════
+document.addEventListener('keydown',function(e){
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.target.tagName==='TEXTAREA')return;
+  if(e.key==='Alt'){altDown=true;}
+  if(e.key===' '){if(!spaceDown){spaceDown=true;if(!pickingSH)wrap.className='cur-grab';}e.preventDefault();return;}
+  var step=e.shiftKey?.25:1;
+  if(e.key==='ArrowLeft'){gridOffX-=step;redraw();e.preventDefault();}
+  if(e.key==='ArrowRight'){gridOffX+=step;redraw();e.preventDefault();}
+  if(e.key==='ArrowUp'){gridOffY-=step;redraw();e.preventDefault();}
+  if(e.key==='ArrowDown'){gridOffY+=step;redraw();e.preventDefault();}
+  if(e.key==='p'||e.key==='P')setEM('paint');
+  if(e.key==='a'||e.key==='A')setEM('align');
+  if(e.key==='e'||e.key==='E')setEM('erase');
+  if(e.key==='i'||e.key==='I')setEM('inspect');
+  if(e.key==='Escape'){hideHelp();closeDomainModal();closePOIModal();if(pickingSH){pickingSH=false;if(pickingSHfor)openDomainModal(pickingSHfor,shStash);pickingSHfor=null;shStash=null;}roadStart=null;setEM('paint');}
+  if(e.key==='z'&&e.ctrlKey){doUndo();e.preventDefault();}
+  if(e.key==='?')showHelp();
+});
+document.addEventListener('keyup',function(e){
+  if(e.key==='Alt')altDown=false;
+  if(e.key===' '){spaceDown=false;if(!pickingSH)wrap.className='';}
+});
+
+function nudge(dx,dy){gridOffX+=dx;gridOffY+=dy;redraw();setStatus('Grid ('+gridOffX.toFixed(2)+','+gridOffY.toFixed(2)+')');}
+function showHelp(){document.getElementById('help-bg').classList.add('vis');}
+function hideHelp(){document.getElementById('help-bg').classList.remove('vis');}
+function setStatus(msg){document.getElementById('smsg').textContent=msg;}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+resizeCanvas();refreshDropdowns(null);updateTerrainDD();renderDomainList();renderHierarchy();redraw();setEM('paint');setPM('domain');
+</script>
+</body>
+</html>
