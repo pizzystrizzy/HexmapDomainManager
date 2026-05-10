@@ -1380,17 +1380,34 @@ document.getElementById('data-in').addEventListener('change',function(e){
   };reader.readAsText(f);
 });
 var currentSaveFilename='hexmap.json';
-function saveJSON(saveAs){
-  if(saveAs||!currentSaveFilename){
-    var name=prompt('Save as filename:',currentSaveFilename||'hexmap.json');
-    if(!name)return;
-    if(!name.endsWith('.json'))name+='.json';
-    currentSaveFilename=name;
+async function saveJSON(saveAs) {
+  var d = {
+    hexSize, gridOffX, gridOffY, flatTop, gridOpacity, fillOpacity,
+    tiers, terrainTypes, civColors, domains, hexData, roads
+  };
+  var json = JSON.stringify(d, null, 2);
+
+  // Modern browsers: lets you pick folder and overwrite files (Required for HTTPS)
+  if ('showSaveFilePicker' in window) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: currentSaveFilename || 'borderlands_data.json',
+        types: [{ description: 'JSON File', accept: {'application/json': ['.json']} }]
+      });
+      const writable = await handle.createWritable();
+      await writable.write(json);
+      await writable.close();
+      currentSaveFilename = handle.name;
+      setStatus('Saved successfully to ' + handle.name);
+    } catch (err) { console.log("Save cancelled"); }
+  } else {
+    // Fallback for older browsers
+    var blob = new Blob([json], {type: 'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = currentSaveFilename || 'borderlands_data.json';
+    a.click();
   }
-  var d={hexSize:hexSize,gridOffX:gridOffX,gridOffY:gridOffY,flatTop:flatTop,gridOpacity:gridOpacity,fillOpacity:fillOpacity,tiers:tiers,terrainTypes:terrainTypes,civColors:civColors,commodities:commodities,domains:domains,hexData:hexData,roads:roads};
-  var blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
-  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=currentSaveFilename;a.click();
-  setStatus('Saved as '+currentSaveFilename+' \u2014 '+domains.length+' domains, '+Object.keys(hexData).length+' hexes.');
 }
 
 // ═══════════════════════════════════════
@@ -1426,7 +1443,82 @@ function setStatus(msg){document.getElementById('smsg').textContent=msg;}
 // ═══════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════
-resizeCanvas();refreshDropdowns(null);updateTerrainDD();renderDomainList();renderHierarchy();redraw();setEM('paint');setPM('domain');
+async function init() {
+  resizeCanvas();
+  refreshDropdowns(null);
+  updateTerrainDD();
+
+  // 1. Load the Map Image
+  const img = new Image();
+  const imageLoaded = new Promise((resolve) => {
+    img.onload = () => {
+      mapImg = img;
+      mapW = img.naturalWidth;
+      mapH = img.naturalHeight;
+      resizeCanvas();
+      // Auto-zoom to fit screen
+      var ww = wrap.clientWidth, wh = wrap.clientHeight;
+      viewScale = Math.min(ww/mapW, wh/mapH) * 0.95;
+      viewX = (ww - mapW * viewScale) / 2;
+      viewY = (wh - mapH * viewScale) / 2;
+      resolve();
+    };
+    img.src = 'BL_scaled2.webp';
+  });
+
+  // 2. Load the Data
+  try {
+    const response = await fetch('borderlands_data.json');
+    if (response.ok) {
+      const d = await response.json();
+
+      // Assign data to global variables
+      hexData = d.hexData || {};
+      roads = d.roads || {};
+      domains = d.domains || [];
+      if (d.tiers) tiers = d.tiers;
+      if (d.terrainTypes) terrainTypes = d.terrainTypes;
+      if (d.civColors) civColors = d.civColors;
+
+      // Update UI settings
+      if (d.hexSize) {
+        hexSize = d.hexSize;
+        document.getElementById('sld-size').value = hexSize;
+        document.getElementById('val-size').textContent = hexSize;
+      }
+      gridOffX = d.gridOffX || 0;
+      gridOffY = d.gridOffY || 0;
+      flatTop = !!d.flatTop;
+      document.getElementById('chk-flat').checked = flatTop;
+
+      if (domains.length) {
+        activeDomain = domains[0].id;
+        document.getElementById('cur-domain-name').textContent = domains[0].name;
+      }
+
+      // Wait for image to be ready before first draw
+      await imageLoaded;
+
+      renderDomainList();
+      renderHierarchy();
+      refreshDropdowns(null);
+      updateTerrainDD();
+      redraw();
+      setStatus('Ready: borderlands_data.json loaded.');
+    }
+  } catch (err) {
+    console.error('Data load failed:', err);
+    await imageLoaded;
+    redraw();
+    setStatus('Map loaded (No data file found).');
+  }
+
+  setEM('paint');
+  setPM('domain');
+}
+
+// Start the app
+init();
 </script>
 </body>
 </html>
