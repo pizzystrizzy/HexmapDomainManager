@@ -95,6 +95,48 @@
     "borderlands": "#04a920",
     "outlands": "#9fb305"
   },
+  "commodities": [
+    {
+      "id": "c1",
+      "name": "Grain"
+    },
+    {
+      "id": "c2",
+      "name": "Livestock"
+    },
+    {
+      "id": "c3",
+      "name": "Wood"
+    },
+    {
+      "id": "c4",
+      "name": "Stone"
+    },
+    {
+      "id": "c5",
+      "name": "Iron"
+    },
+    {
+      "id": "c6",
+      "name": "Salt"
+    },
+    {
+      "id": "c7",
+      "name": "Cloth"
+    },
+    {
+      "id": "c8",
+      "name": "Furs"
+    },
+    {
+      "id": "c9",
+      "name": "Wine"
+    },
+    {
+      "id": "c10",
+      "name": "Spices"
+    }
+  ],
   "domains": [
     {
       "id": "d1_1778136813161",
@@ -107,7 +149,13 @@
       "tier": "t1",
       "liege": "",
       "showBorder": true,
-      "borderColor": "#fa0000"
+      "borderColor": "#fa0000",
+      "showSubBorders": false,
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
     },
     {
       "id": "d2_1778136958254",
@@ -172,7 +220,13 @@
       "tier": "t3",
       "liege": "d3_1778137097711",
       "showBorder": true,
-      "borderColor": "#111111"
+      "borderColor": "#000000",
+      "showSubBorders": false,
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
     },
     {
       "id": "d7_1778137847262",
@@ -183,7 +237,8 @@
       "color": "#d9534f",
       "alpha": 50,
       "tier": "t4",
-      "liege": "d6_1778137704656"
+      "liege": "d6_1778137704656",
+      "showBorder": false
     },
     {
       "id": "d8_1778221809262",
@@ -691,6 +746,25 @@
       "liege": "d13_1778222907080",
       "showBorder": false,
       "borderColor": "#111111"
+    },
+    {
+      "id": "d47_1778358899462",
+      "stronghold": "",
+      "shtype": "",
+      "name": "Lake Laman",
+      "ruler": "",
+      "color": "#48a8a0",
+      "alpha": 10,
+      "tier": "",
+      "liege": "d35_1778277595487",
+      "showBorder": false,
+      "showSubBorders": false,
+      "borderColor": "#111111",
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
     }
   ],
   "hexData": {
@@ -894,7 +968,14 @@
       "terrain": "tr5",
       "civ": "outlands",
       "civOverride": false,
-      "pois": []
+      "pois": [
+        {
+          "id": "p2_1778359502288",
+          "name": "Buried Temple",
+          "icon": "🛕",
+          "notes": "When the borderlands were in the dark grip of the Zaharan Empire, the empire’s sorcerer-priests erected a profane temple to house the terrible artifact known as the Stone of Sakkara. Using the Stone, the sorcerer-priests could birth monsters and abominations with frightening ease and magically command the loyalty of chaotic creatures. The Stone brought its evil masters great power throughout the fell empire. In the centuries since the fall of Zahar, the Stone has lain dormant and forgotten. Now it has awakened, and warbands of beastmen have begun to gather sacrifices to power the Stone’s birthing pools again. Entire families have been kidnapped from local villages."
+        }
+      ]
     },
     "19,18": {
       "realm": "",
@@ -2353,7 +2434,8 @@
       "terrain": "tr12",
       "civ": "unsettled",
       "civOverride": true,
-      "pois": []
+      "pois": [],
+      "domain": "d47_1778358899462"
     },
     "19,14": {
       "realm": "",
@@ -12776,28 +12858,28 @@
       "pois": []
     },
     "16,7": {
-      "domain": "",
+      "domain": "d47_1778358899462",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "17,7": {
-      "domain": "",
+      "domain": "d47_1778358899462",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "18,8": {
-      "domain": "",
+      "domain": "d47_1778358899462",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "18,9": {
-      "domain": "",
+      "domain": "d47_1778358899462",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
@@ -12811,77 +12893,77 @@
       "pois": []
     },
     "17,10": {
-      "domain": "",
+      "domain": "d47_1778358899462",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "17,11": {
-      "domain": "",
+      "domain": "d47_1778358899462",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "18,12": {
-      "domain": "",
+      "domain": "d47_1778358899462",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "19,11": {
-      "domain": "",
+      "domain": "d47_1778358899462",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "20,11": {
-      "domain": "",
+      "domain": "d47_1778358899462",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "21,12": {
-      "domain": "",
+      "domain": "d47_1778358899462",
       "terrain": "",
       "civ": "borderlands",
       "civOverride": true,
       "pois": []
     },
     "20,12": {
-      "domain": "",
+      "domain": "d47_1778358899462",
       "terrain": "",
       "civ": "borderlands",
       "civOverride": true,
       "pois": []
     },
     "19,12": {
-      "domain": "",
+      "domain": "d47_1778358899462",
       "terrain": "",
       "civ": "borderlands",
       "civOverride": true,
       "pois": []
     },
     "18,13": {
-      "domain": "",
+      "domain": "d47_1778358899462",
       "terrain": "",
       "civ": "borderlands",
       "civOverride": true,
       "pois": []
     },
     "17,12": {
-      "domain": "",
+      "domain": "d47_1778358899462",
       "terrain": "",
       "civ": "borderlands",
       "civOverride": true,
       "pois": []
     },
     "16,13": {
-      "domain": "",
+      "domain": "d47_1778358899462",
       "terrain": "",
       "civ": "borderlands",
       "civOverride": true,
