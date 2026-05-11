@@ -1468,7 +1468,7 @@ async function init() {
 
   // 2. Load the Data
   try {
-    const response = await fetch('borderlands_data.json');
+    const response = await fetch('data/borderlands.json?v=' + Date.now());
     if (response.ok) {
       const d = await response.json();
 
