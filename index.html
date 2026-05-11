@@ -1463,12 +1463,14 @@ async function init() {
       viewY = (wh - mapH * viewScale) / 2;
       resolve();
     };
+    // Make sure this filename is exactly correct (case-sensitive on GitHub!)
     img.src = 'BL_scaled2.webp';
   });
 
   // 2. Load the Data
   try {
-    const response = await fetch('data/borderlands.json?v=' + Date.now());
+    const response = await fetch('borderlands_data.json?v=' + Date.now());
+
     if (response.ok) {
       const d = await response.json();
 
@@ -1495,23 +1497,26 @@ async function init() {
         activeDomain = domains[0].id;
         document.getElementById('cur-domain-name').textContent = domains[0].name;
       }
-
-      // Wait for image to be ready before first draw
-      await imageLoaded;
-
-      renderDomainList();
-      renderHierarchy();
-      refreshDropdowns(null);
-      updateTerrainDD();
-      redraw();
-      setStatus('Ready: borderlands_data.json loaded.');
+      setStatus('Data loaded successfully.');
+    } else {
+      // THIS WAS MISSING: Handles 404 Not Found errors
+      console.error('Data file not found (404). Check your file path!');
+      setStatus('Map loaded (No data file found at path).');
     }
   } catch (err) {
-    console.error('Data load failed:', err);
-    await imageLoaded;
-    redraw();
-    setStatus('Map loaded (No data file found).');
+    console.error('JSON Parse error or Fetch crash:', err);
+    setStatus('Error parsing map data.');
   }
+
+  // 3. Finalize: Wait for image and DRAW
+  // We move this OUTSIDE the try/catch so the map draws even if data fails
+  await imageLoaded;
+
+  renderDomainList();
+  renderHierarchy();
+  refreshDropdowns(null);
+  updateTerrainDD();
+  redraw();
 
   setEM('paint');
   setPM('domain');
