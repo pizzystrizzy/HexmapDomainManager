@@ -95,48 +95,6 @@
     "borderlands": "#04a920",
     "outlands": "#9fb305"
   },
-  "commodities": [
-    {
-      "id": "c1",
-      "name": "Grain"
-    },
-    {
-      "id": "c2",
-      "name": "Livestock"
-    },
-    {
-      "id": "c3",
-      "name": "Wood"
-    },
-    {
-      "id": "c4",
-      "name": "Stone"
-    },
-    {
-      "id": "c5",
-      "name": "Iron"
-    },
-    {
-      "id": "c6",
-      "name": "Salt"
-    },
-    {
-      "id": "c7",
-      "name": "Cloth"
-    },
-    {
-      "id": "c8",
-      "name": "Furs"
-    },
-    {
-      "id": "c9",
-      "name": "Wine"
-    },
-    {
-      "id": "c10",
-      "name": "Spices"
-    }
-  ],
   "domains": [
     {
       "id": "d1_1778136813161",
@@ -149,13 +107,7 @@
       "tier": "t1",
       "liege": "",
       "showBorder": true,
-      "borderColor": "#fa0000",
-      "showSubBorders": false,
-      "morale": 0,
-      "marketClass": 0,
-      "peasantFam": 0,
-      "urbanFam": 0,
-      "demandMods": {}
+      "borderColor": "#fa0000"
     },
     {
       "id": "d2_1778136958254",
@@ -220,13 +172,7 @@
       "tier": "t3",
       "liege": "d3_1778137097711",
       "showBorder": true,
-      "borderColor": "#000000",
-      "showSubBorders": false,
-      "morale": 0,
-      "marketClass": 0,
-      "peasantFam": 0,
-      "urbanFam": 0,
-      "demandMods": {}
+      "borderColor": "#111111"
     },
     {
       "id": "d7_1778137847262",
@@ -237,8 +183,7 @@
       "color": "#d9534f",
       "alpha": 50,
       "tier": "t4",
-      "liege": "d6_1778137704656",
-      "showBorder": false
+      "liege": "d6_1778137704656"
     },
     {
       "id": "d8_1778221809262",
@@ -294,7 +239,7 @@
     },
     {
       "id": "d12_1778222444948",
-      "stronghold": "13,14",
+      "stronghold": "8,21",
       "shtype": "other",
       "name": "Castellum Viamar",
       "ruler": "Zelicus Amadorus",
@@ -303,7 +248,13 @@
       "tier": "t_1778066867241",
       "liege": "d3_1778137097711",
       "showBorder": true,
-      "borderColor": "#111111"
+      "borderColor": "#111111",
+      "showSubBorders": false,
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
     },
     {
       "id": "d13_1778222907080",
@@ -748,15 +699,15 @@
       "borderColor": "#111111"
     },
     {
-      "id": "d47_1778358899462",
+      "id": "d47_1778374197513",
       "stronghold": "",
       "shtype": "",
       "name": "Lake Laman",
       "ruler": "",
       "color": "#48a8a0",
       "alpha": 10,
-      "tier": "",
-      "liege": "d35_1778277595487",
+      "tier": "t_1778066867241",
+      "liege": "d32_1778277185003",
       "showBorder": false,
       "showSubBorders": false,
       "borderColor": "#111111",
@@ -968,14 +919,7 @@
       "terrain": "tr5",
       "civ": "outlands",
       "civOverride": false,
-      "pois": [
-        {
-          "id": "p2_1778359502288",
-          "name": "Buried Temple",
-          "icon": "🛕",
-          "notes": "When the borderlands were in the dark grip of the Zaharan Empire, the empire’s sorcerer-priests erected a profane temple to house the terrible artifact known as the Stone of Sakkara. Using the Stone, the sorcerer-priests could birth monsters and abominations with frightening ease and magically command the loyalty of chaotic creatures. The Stone brought its evil masters great power throughout the fell empire. In the centuries since the fall of Zahar, the Stone has lain dormant and forgotten. Now it has awakened, and warbands of beastmen have begun to gather sacrifices to power the Stone’s birthing pools again. Entire families have been kidnapped from local villages."
-        }
-      ]
+      "pois": []
     },
     "19,18": {
       "realm": "",
@@ -1424,7 +1368,7 @@
       "civ": "borderlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d12_1778222444948"
+      "domain": "d7_1778137847262"
     },
     "13,16": {
       "realm": "r2_1778067206207",
@@ -1483,7 +1427,8 @@
       "terrain": "",
       "civ": "outlands",
       "civOverride": true,
-      "pois": []
+      "pois": [],
+      "domain": "d30_1778276787314"
     },
     "6,16": {
       "realm": "r7_1778102366242",
@@ -1539,7 +1484,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d30_1778276787314"
+      "domain": ""
     },
     "7,20": {
       "realm": "r5_1778102228309",
@@ -1547,7 +1492,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d28_1778276571156"
+      "domain": "d29_1778276678273"
     },
     "6,22": {
       "realm": "r5_1778102228309",
@@ -1555,7 +1500,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d30_1778276787314"
+      "domain": ""
     },
     "6,23": {
       "realm": "r5_1778102228309",
@@ -1563,7 +1508,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d30_1778276787314"
+      "domain": ""
     },
     "6,24": {
       "realm": "r5_1778102228309",
@@ -1571,7 +1516,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d30_1778276787314"
+      "domain": ""
     },
     "6,25": {
       "realm": "r5_1778102228309",
@@ -1579,7 +1524,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d30_1778276787314"
+      "domain": ""
     },
     "7,25": {
       "realm": "r5_1778102228309",
@@ -1587,7 +1532,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d30_1778276787314"
+      "domain": ""
     },
     "8,26": {
       "realm": "r5_1778102228309",
@@ -1595,7 +1540,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d30_1778276787314"
+      "domain": ""
     },
     "9,26": {
       "realm": "r5_1778102228309",
@@ -1858,7 +1803,7 @@
       "civ": "borderlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d28_1778276571156"
     },
     "11,15": {
       "realm": "r7_1778102366242",
@@ -1890,7 +1835,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d28_1778276571156"
+      "domain": "d29_1778276678273"
     },
     "9,18": {
       "realm": "r6_1778102308062",
@@ -1954,7 +1899,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d29_1778276678273"
+      "domain": "d12_1778222444948"
     },
     "7,21": {
       "realm": "r5_1778102228309",
@@ -1962,7 +1907,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d29_1778276678273"
+      "domain": ""
     },
     "7,22": {
       "realm": "r5_1778102228309",
@@ -1970,7 +1915,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d30_1778276787314"
+      "domain": ""
     },
     "8,22": {
       "realm": "r6_1778102308062",
@@ -1978,7 +1923,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d29_1778276678273"
+      "domain": ""
     },
     "8,23": {
       "realm": "r5_1778102228309",
@@ -2018,7 +1963,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d30_1778276787314"
+      "domain": ""
     },
     "7,23": {
       "realm": "r5_1778102228309",
@@ -2026,7 +1971,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d30_1778276787314"
+      "domain": ""
     },
     "7,24": {
       "realm": "r5_1778102228309",
@@ -2034,7 +1979,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d30_1778276787314"
+      "domain": ""
     },
     "9,22": {
       "realm": "r6_1778102308062",
@@ -2336,7 +2281,8 @@
       "terrain": "tr12",
       "civ": "unsettled",
       "civOverride": true,
-      "pois": []
+      "pois": [],
+      "domain": ""
     },
     "20,14": {
       "realm": "",
@@ -2435,7 +2381,7 @@
       "civ": "unsettled",
       "civOverride": true,
       "pois": [],
-      "domain": "d47_1778358899462"
+      "domain": "d47_1778374197513"
     },
     "19,14": {
       "realm": "",
@@ -11780,7 +11726,7 @@
       "pois": []
     },
     "4,14": {
-      "domain": "",
+      "domain": "d30_1778276787314",
       "terrain": "",
       "civ": "outlands",
       "civOverride": true,
@@ -12550,56 +12496,56 @@
       "pois": []
     },
     "4,17": {
-      "domain": "",
+      "domain": "d30_1778276787314",
       "terrain": "",
       "civ": "outlands",
       "civOverride": true,
       "pois": []
     },
     "5,16": {
-      "domain": "",
+      "domain": "d28_1778276571156",
       "terrain": "",
       "civ": "outlands",
       "civOverride": true,
       "pois": []
     },
     "4,16": {
-      "domain": "",
+      "domain": "d30_1778276787314",
       "terrain": "",
       "civ": "outlands",
       "civOverride": true,
       "pois": []
     },
     "4,15": {
-      "domain": "",
+      "domain": "d30_1778276787314",
       "terrain": "",
       "civ": "outlands",
       "civOverride": true,
       "pois": []
     },
     "3,15": {
-      "domain": "",
+      "domain": "d30_1778276787314",
       "terrain": "",
       "civ": "outlands",
       "civOverride": true,
       "pois": []
     },
     "3,14": {
-      "domain": "",
+      "domain": "d30_1778276787314",
       "terrain": "",
       "civ": "outlands",
       "civOverride": true,
       "pois": []
     },
     "2,15": {
-      "domain": "",
+      "domain": "d30_1778276787314",
       "terrain": "",
       "civ": "outlands",
       "civOverride": true,
       "pois": []
     },
     "2,16": {
-      "domain": "",
+      "domain": "d30_1778276787314",
       "terrain": "",
       "civ": "outlands",
       "civOverride": true,
@@ -12620,7 +12566,7 @@
       "pois": []
     },
     "3,16": {
-      "domain": "",
+      "domain": "d30_1778276787314",
       "terrain": "",
       "civ": "outlands",
       "civOverride": true,
@@ -12858,28 +12804,28 @@
       "pois": []
     },
     "16,7": {
-      "domain": "d47_1778358899462",
+      "domain": "d47_1778374197513",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "17,7": {
-      "domain": "d47_1778358899462",
+      "domain": "d47_1778374197513",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "18,8": {
-      "domain": "d47_1778358899462",
+      "domain": "d47_1778374197513",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "18,9": {
-      "domain": "d47_1778358899462",
+      "domain": "d47_1778374197513",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
@@ -12893,77 +12839,77 @@
       "pois": []
     },
     "17,10": {
-      "domain": "d47_1778358899462",
+      "domain": "d47_1778374197513",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "17,11": {
-      "domain": "d47_1778358899462",
+      "domain": "d47_1778374197513",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "18,12": {
-      "domain": "d47_1778358899462",
+      "domain": "d47_1778374197513",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "19,11": {
-      "domain": "d47_1778358899462",
+      "domain": "d47_1778374197513",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "20,11": {
-      "domain": "d47_1778358899462",
+      "domain": "d47_1778374197513",
       "terrain": "",
       "civ": "civilized",
       "civOverride": true,
       "pois": []
     },
     "21,12": {
-      "domain": "d47_1778358899462",
+      "domain": "d47_1778374197513",
       "terrain": "",
       "civ": "borderlands",
       "civOverride": true,
       "pois": []
     },
     "20,12": {
-      "domain": "d47_1778358899462",
+      "domain": "d47_1778374197513",
       "terrain": "",
       "civ": "borderlands",
       "civOverride": true,
       "pois": []
     },
     "19,12": {
-      "domain": "d47_1778358899462",
+      "domain": "d47_1778374197513",
       "terrain": "",
       "civ": "borderlands",
       "civOverride": true,
       "pois": []
     },
     "18,13": {
-      "domain": "d47_1778358899462",
+      "domain": "d47_1778374197513",
       "terrain": "",
       "civ": "borderlands",
       "civOverride": true,
       "pois": []
     },
     "17,12": {
-      "domain": "d47_1778358899462",
+      "domain": "d47_1778374197513",
       "terrain": "",
       "civ": "borderlands",
       "civOverride": true,
       "pois": []
     },
     "16,13": {
-      "domain": "d47_1778358899462",
+      "domain": "d47_1778374197513",
       "terrain": "",
       "civ": "borderlands",
       "civOverride": true,
