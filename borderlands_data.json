@@ -3,8 +3,8 @@
   "gridOffX": -13.222801668455126,
   "gridOffY": -38.01555479680849,
   "flatTop": true,
-  "gridOpacity": 1,
-  "fillOpacity": 0.42,
+  "gridOpacity": 0.5,
+  "fillOpacity": 0.55,
   "tiers": [
     {
       "id": "t1",
@@ -172,18 +172,27 @@
       "tier": "t3",
       "liege": "d3_1778137097711",
       "showBorder": true,
-      "borderColor": "#111111"
+      "borderColor": "#111111",
+      "showSubBorders": false
     },
     {
       "id": "d7_1778137847262",
       "stronghold": "",
       "shtype": "",
-      "name": "Türos Tem Realm",
+      "name": "Valar",
       "ruler": "Valen Valar",
       "color": "#d9534f",
       "alpha": 50,
       "tier": "t4",
-      "liege": "d6_1778137704656"
+      "liege": "d6_1778137704656",
+      "showBorder": false,
+      "showSubBorders": false,
+      "borderColor": "#111111",
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
     },
     {
       "id": "d8_1778221809262",
@@ -716,6 +725,253 @@
       "peasantFam": 0,
       "urbanFam": 0,
       "demandMods": {}
+    },
+    {
+      "id": "d1_1778541884979",
+      "stronghold": "20,21",
+      "shtype": "",
+      "name": "Crescens (Türos Tem)",
+      "ruler": "Publius Crescens",
+      "color": "#d9534f",
+      "alpha": 50,
+      "tier": "t_1778066867241",
+      "liege": "d7_1778137847262",
+      "showBorder": false,
+      "showSubBorders": false,
+      "borderColor": "#111111",
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
+    },
+    {
+      "id": "d2_1778542014634",
+      "stronghold": "",
+      "shtype": "",
+      "name": "Mennicus (Türos Tem)",
+      "ruler": "Omus Mennicus",
+      "color": "#d9534f",
+      "alpha": 50,
+      "tier": "t_1778066867241",
+      "liege": "d7_1778137847262",
+      "showBorder": false,
+      "showSubBorders": false,
+      "borderColor": "#111111",
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
+    },
+    {
+      "id": "d3_1778542088746",
+      "stronghold": "",
+      "shtype": "",
+      "name": "Klenatos (Türos Tem)",
+      "ruler": "Damanos Klenatos",
+      "color": "#d9534f",
+      "alpha": 50,
+      "tier": "t_1778066867241",
+      "liege": "d7_1778137847262",
+      "showBorder": false,
+      "showSubBorders": false,
+      "borderColor": "#111111",
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
+    },
+    {
+      "id": "d4_1778542277843",
+      "stronghold": "",
+      "shtype": "",
+      "name": "Quellan (Türos Tem)",
+      "ruler": "Gundus Quellan",
+      "color": "#d9534f",
+      "alpha": 50,
+      "tier": "t4",
+      "liege": "d6_1778137704656",
+      "showBorder": false,
+      "showSubBorders": false,
+      "borderColor": "#111111",
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
+    },
+    {
+      "id": "d5_1778542514275",
+      "stronghold": "",
+      "shtype": "",
+      "name": "Süromus (Türos Tem)",
+      "ruler": "Tavus Süromus",
+      "color": "#d9534f",
+      "alpha": 50,
+      "tier": "t_1778066867241",
+      "liege": "d4_1778542277843",
+      "showBorder": false,
+      "showSubBorders": false,
+      "borderColor": "#111111",
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
+    },
+    {
+      "id": "d6_1778542631603",
+      "stronghold": "",
+      "shtype": "",
+      "name": "Hilerno (Türos Tem)",
+      "ruler": "Mandonio Hilerno",
+      "color": "#d9534f",
+      "alpha": 50,
+      "tier": "t_1778066867241",
+      "liege": "d4_1778542277843",
+      "showBorder": false,
+      "showSubBorders": false,
+      "borderColor": "#111111",
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
+    },
+    {
+      "id": "d7_1778542703357",
+      "stronghold": "",
+      "shtype": "",
+      "name": "Tarcalus (Türos Tem)",
+      "ruler": "Aurëus Tarcalus",
+      "color": "#d9534f",
+      "alpha": 50,
+      "tier": "t_1778066867241",
+      "liege": "d7_1778137847262",
+      "showBorder": false,
+      "showSubBorders": false,
+      "borderColor": "#111111",
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
+    },
+    {
+      "id": "d8_1778542766223",
+      "stronghold": "",
+      "shtype": "",
+      "name": "Leannatos (Türos Tem)",
+      "ruler": "Destrio Leannatos",
+      "color": "#d9534f",
+      "alpha": 50,
+      "tier": "t4",
+      "liege": "d6_1778137704656",
+      "showBorder": false,
+      "showSubBorders": false,
+      "borderColor": "#111111",
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
+    },
+    {
+      "id": "d9_1778542807800",
+      "stronghold": "",
+      "shtype": "",
+      "name": "Amadorus (Türos Tem)",
+      "ruler": "Aurëus Amadorus",
+      "color": "#d9534f",
+      "alpha": 50,
+      "tier": "t_1778066867241",
+      "liege": "d8_1778542766223",
+      "showBorder": false,
+      "showSubBorders": false,
+      "borderColor": "#111111",
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
+    },
+    {
+      "id": "d10_1778542840479",
+      "stronghold": "",
+      "shtype": "",
+      "name": "Caradoc (Türos Tem)",
+      "ruler": "Theon Ty Caradoc",
+      "color": "#d9534f",
+      "alpha": 50,
+      "tier": "t_1778066867241",
+      "liege": "d8_1778542766223",
+      "showBorder": false,
+      "showSubBorders": false,
+      "borderColor": "#111111",
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
+    },
+    {
+      "id": "d11_1778542926696",
+      "stronghold": "",
+      "shtype": "",
+      "name": "Tyrimmas (Türos Tem)",
+      "ruler": "Spyros Tyrimmas",
+      "color": "#d9534f",
+      "alpha": 50,
+      "tier": "t4",
+      "liege": "d6_1778137704656",
+      "showBorder": false,
+      "showSubBorders": false,
+      "borderColor": "#111111",
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
+    },
+    {
+      "id": "d12_1778543015949",
+      "stronghold": "",
+      "shtype": "",
+      "name": "Thalesakis (Türos Tem)",
+      "ruler": "Basilio Thalesakis",
+      "color": "#d9534f",
+      "alpha": 50,
+      "tier": "t_1778066867241",
+      "liege": "d11_1778542926696",
+      "showBorder": false,
+      "showSubBorders": false,
+      "borderColor": "#111111",
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
+    },
+    {
+      "id": "d13_1778543060135",
+      "stronghold": "",
+      "shtype": "",
+      "name": "Drakon (Türos Tem)",
+      "ruler": "Celictor Drakon",
+      "color": "#d9534f",
+      "alpha": 50,
+      "tier": "t_1778066867241",
+      "liege": "d11_1778542926696",
+      "showBorder": false,
+      "showSubBorders": false,
+      "borderColor": "#111111",
+      "morale": 0,
+      "marketClass": 0,
+      "peasantFam": 0,
+      "urbanFam": 0,
+      "demandMods": {}
     }
   ],
   "hexData": {
@@ -797,7 +1053,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d31_1778276895241"
+      "domain": "d1_1778541884979"
     },
     "21,21": {
       "realm": "",
@@ -843,7 +1099,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d10_1778542840479"
     },
     "14,21": {
       "realm": "r8_1778102461616",
@@ -890,7 +1146,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d13_1778543060135"
     },
     "19,21": {
       "realm": "r8_1778102461616",
@@ -1182,7 +1438,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d7_1778542703357"
     },
     "17,5": {
       "realm": "r3_1778094864327",
@@ -1345,7 +1601,7 @@
       "civ": "borderlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d4_1778542277843"
     },
     "14,17": {
       "realm": "",
@@ -1360,7 +1616,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d6_1778542631603"
     },
     "13,14": {
       "realm": "r2_1778067206207",
@@ -1368,7 +1624,7 @@
       "civ": "borderlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d4_1778542277843"
     },
     "13,16": {
       "realm": "r2_1778067206207",
@@ -1376,7 +1632,7 @@
       "civ": "borderlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d8_1778542766223"
     },
     "14,16": {
       "realm": "",
@@ -1412,7 +1668,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d11_1778542926696"
     },
     "14,20": {
       "realm": "r2_1778067206207",
@@ -1420,7 +1676,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d9_1778542807800"
     },
     "5,15": {
       "realm": "",
@@ -1699,7 +1955,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d12_1778543015949"
     },
     "17,20": {
       "realm": "r2_1778067206207",
@@ -1707,7 +1963,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d2_1778542014634"
     },
     "17,19": {
       "realm": "r2_1778067206207",
@@ -1715,7 +1971,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d3_1778542088746"
     },
     "16,20": {
       "realm": "r2_1778067206207",
@@ -1723,7 +1979,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d5_1778542514275"
     },
     "12,18": {
       "realm": "r2_1778067206207",
@@ -1731,7 +1987,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d11_1778542926696"
     },
     "12,17": {
       "realm": "r2_1778067206207",
@@ -1739,7 +1995,7 @@
       "civ": "outlands",
       "civOverride": true,
       "pois": [],
-      "domain": "d7_1778137847262"
+      "domain": "d8_1778542766223"
     },
     "12,14": {
       "realm": "r7_1778102366242",
@@ -2123,7 +2379,7 @@
       "civ": "outlands",
       "civOverride": false,
       "pois": [],
-      "domain": ""
+      "domain": "d31_1778276895241"
     },
     "17,21": {
       "realm": "r8_1778102461616",
@@ -3028,7 +3284,8 @@
       "terrain": "tr5",
       "civ": "unsettled",
       "civOverride": true,
-      "pois": []
+      "pois": [],
+      "domain": ""
     },
     "23,21": {
       "realm": "",
